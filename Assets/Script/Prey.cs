@@ -9,8 +9,8 @@ public class Prey : MonoBehaviour
     public static event Action<GameObject> OnDead;
     // Start is called before the first frame update
     void Start()
-    {   
-        
+    {
+
     }
 
     // Update is called once per frame
@@ -26,6 +26,11 @@ public class Prey : MonoBehaviour
     public void Death()
     {
         OnDead?.Invoke(this.gameObject);
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        //if (other.gameObject.tag == "Predator") Destroy(this.gameObject);
     }
 
 }

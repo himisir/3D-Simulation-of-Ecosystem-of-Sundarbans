@@ -66,18 +66,32 @@ public class SimulationManager : MonoBehaviour
 
         }
     }
-    Vector3 RandomSearch(Vector3 currentPos, float radius)
+
+
+    Vector3 RandomPosition(Vector3 origin, float radius)
     {
-        Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
-        randomDirection += currentPos;
+        Vector3 newPosition = new Vector3(UnityEngine.Random.Range(-radius, radius), origin.y, UnityEngine.Random.Range(-radius, radius));
+
+        if (!Physics.Raycast(newPosition, Vector3.down, radius)) newPosition = RandomPosition(origin, radius);
+
+        return newPosition;
+    }
+
+
+    Vector3 RandomSearch(Vector3 origin, float distance)
+    {
+        Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * distance;
+
+        randomDirection += origin;
+
         NavMeshHit navHit;
-        NavMesh.SamplePosition(randomDirection, out navHit, radius, NavMesh.AllAreas);
-        if (!navHit.hit)
-        {
-            RandomSearch(currentPos, radius);
-        }
+
+        NavMesh.SamplePosition(randomDirection, out navHit, distance, NavMesh.AllAreas);
+
         return navHit.position;
     }
+
+
 
     public void BreedTiger()
     {
@@ -86,6 +100,7 @@ public class SimulationManager : MonoBehaviour
         for (int i = 0; i < literSize; i++)
         {
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
+
             Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
 
             var tiger = Instantiate(predator, position, Quaternion.identity);
@@ -100,7 +115,7 @@ public class SimulationManager : MonoBehaviour
         for (int i = 0; i < literSize; i++)
         {
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
-            Vector3 position = new Vector3(deerOrigin.transform.position.x + range, deerOrigin.transform.position.y, deerOrigin.transform.position.z);
+            Vector3 position = RandomSearch(deerOrigin.transform.position, range);
             var deer = Instantiate(prey, position, Quaternion.identity);
             deerList.Add(deer);
         }
