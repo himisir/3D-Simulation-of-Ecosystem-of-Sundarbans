@@ -46,7 +46,7 @@ public class Predator : MonoBehaviour
     public float runningSpeed = 2f;
     public float visionRadius = 10f;
     public float attackRadius = 1f;
-    public float maxTravelLimit = 20;
+    public float maxTravelLimit = 50;
     public float roamDistance = 15;
     public float breedFactor = 1;
 
@@ -65,9 +65,13 @@ public class Predator : MonoBehaviour
     [SerializeField]
     bool isMate;
     [SerializeField]
+    bool isGoHome;
+    [SerializeField]
     bool isAcceptMate; //if accepting mating offer
     [SerializeField]
-    bool isBreed;
+    bool isBreedNow;
+    [SerializeField]
+    bool hasBreed;
     [SerializeField]
     bool isAdult;
     [SerializeField]
@@ -80,13 +84,13 @@ public class Predator : MonoBehaviour
     [Header("Consumption and Reproduction")]
 
     [SerializeField]
-    float timeSinceLastMeal;
+    float timeSinceLastMeal = 1;
     [SerializeField]
-    float timeSinceLastDrink;
+    float timeSinceLastDrink = 1;
     [SerializeField]
-    float timeSinceLastMate;
+    float timeSinceLastMate = 1;
     [SerializeField]
-    float timeSinceLastBreed; //% will decrease over time since its birth
+    float timeSinceLastBreed = 1; //% will decrease over time since its birth
 
     [Header("Date from sheet")]
 
@@ -95,7 +99,7 @@ public class Predator : MonoBehaviour
     [SerializeField]
     float maxDaysWithoutFood = 14;
     [SerializeField]
-    float maxDaysWithoutDrink = 3;
+    float maxDaysWithoutDrink = 4;
     [SerializeField]
     float breedCoolDownPeriod = 2500;
     [SerializeField]
@@ -121,12 +125,17 @@ public class Predator : MonoBehaviour
         SimulationManager.Initialize += Initialization;
         SimulationManager.AgeCounter += CalenderSystem;
         SimulationManager.TigerOrigin += LocalRegionManager;
+        SimulationManager.NewBornStat += ParameterInitializeForNewBreed;
+
+
         visionSphere = GetComponent<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-
         int random = UnityEngine.Random.Range(0, 2);
         gender = (random == 1) ? "male" : "female";
+        state = State.Idle;
+        actionTimer = UnityEngine.Random.Range(0.1f, 2f);
+        SwitchAnimation(state);
 
     }
     private void OnDestroy()
@@ -134,7 +143,83 @@ public class Predator : MonoBehaviour
         SimulationManager.AgeCounter -= CalenderSystem;
         SimulationManager.Initialize -= Initialization;
         SimulationManager.TigerOrigin -= LocalRegionManager;
+        SimulationManager.NewBornStat -= ParameterInitializeForNewBreed;
     }
+    public void ParameterInitializeForNewBreed()
+    {
+
+        age = 0;
+        actionTimer = 0;
+        switchAction = false;
+        newBornScale = 0.1f;
+        hunger = 0;
+        thirst = 0;
+        breedCount = 0;
+        breedFactor = 0;
+        walkingSpeed = 1f;
+        pregnantSpeed = .7f;
+        summerSpeed = 1.5f;
+        rainSpeed = .5f;
+        runningSpeed = 2f;
+        visionRadius = 10f;
+        attackRadius = 1f;
+        maxTravelLimit = 20;
+        roamDistance = 15;
+        breedFactor = 1;
+        speedFactor = 1;
+        isPregnant = false;
+        isHungry = false;
+        isDead = false;
+        isMate = false;
+        isGoHome = false;
+        isAcceptMate = false;
+        isBreedNow = false;
+        hasBreed = false;
+        isAdult = false;
+        unfortunateDeath = false;
+        isFindMate = false;
+        isAvailable = false;
+        timeSinceLastBreed = 1;
+        timeSinceLastMate = 1;
+        timeSinceLastDrink = 1;
+        timeSinceLastMeal = 1;
+
+    }
+
+
+    void SimulationLoop()
+    {
+        if (actionTimer > 0)
+        {
+            actionTimer -= Time.deltaTime;
+        }
+        else
+        {
+            switchAction = true;
+        }
+        if (switchAction)
+        {
+            switchAction = false;
+            EventTrigger();
+        }
+
+    }
+    bool DestinationReached()
+    {
+        if (!agent.pathPending)
+        {
+            if (agent.remainingDistance <= agent.stoppingDistance)
+            {
+                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
 
     void LocalRegionManager(GameObject tigerOrigin)
     {
@@ -167,7 +252,7 @@ public class Predator : MonoBehaviour
         {
             timeSinceLastMate++;
         }
-        else if (isBreed)
+        else if (hasBreed)
         {
             timeSinceLastBreed++;
         }
@@ -177,6 +262,7 @@ public class Predator : MonoBehaviour
         VisionCheck();
         Engine();
         HungerThirst();
+        SimulationLoop();
     }
     void VisionCheck()
     {
@@ -205,15 +291,19 @@ public class Predator : MonoBehaviour
         {
             isFindMate = true; //Trigger FindMate()
         }
+        if (isPregnant && timeSinceLastMate > pregnancyPeriod)
+        {
+            isBreedNow = true;
+        }
 
         //When hunting, if water nearby, drink
         /// Check if hungry(after 7 days usually)
-        if (timeSinceLastMeal > maxDaysWithoutFood / 2)
+        if (timeSinceLastMeal > maxDaysWithoutFood / 2 || hunger >= 60)
         {
             isHungry = true; //Trigger FindFood()
         }
         /// Check if thirsty(Drink every)
-        if (timeSinceLastDrink > 1)
+        if (timeSinceLastDrink > 1 || thirst >= 60)
         {
             isThirsty = true; //Trigger FindWater()
         }
@@ -223,6 +313,10 @@ public class Predator : MonoBehaviour
         if (age >= lifeTime || timeSinceLastMeal >= maxDaysWithoutFood || timeSinceLastDrink >= maxDaysWithoutDrink || unfortunateDeath)
         {
             isDead = true; //Trigger Dead()
+        }
+        if (isGoHome && DestinationReached())
+        {
+            isGoHome = false;
         }
     }
 
@@ -242,7 +336,15 @@ public class Predator : MonoBehaviour
         }
         if (isDead)
         {
-            Dead();
+            // Dead();
+        }
+        if (isBreedNow)
+        {
+            Breed();
+        }
+        if (isGoHome)
+        {
+            GoHome();
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -255,8 +357,10 @@ public class Predator : MonoBehaviour
 
     void Roam()
     {
+        if (!DestinationReached()) return;
         agent.speed = walkingSpeed * speedFactor;
-        SwitchAnimation(State.Walking);
+        state = State.Walking;
+        SwitchAnimation(state);
         Vector3 targetPos = RandomSearch(transform.position, roamDistance);
         if (Vector3.Distance(origin.position, targetPos) > maxTravelLimit)
             return;
@@ -264,12 +368,13 @@ public class Predator : MonoBehaviour
     }
     void Chase(Vector3 targetPos)
     {
+        //if (!DestinationReached()) return;
         if (Vector3.Distance(origin.position, targetPos) > maxTravelLimit)
             return;
         agent.speed = runningSpeed * speedFactor;
         agent.SetDestination(targetPos);
-
-        SwitchAnimation(State.Running);
+        state = State.Running;
+        SwitchAnimation(state);
     }
     void FindFood()
     {
@@ -343,63 +448,50 @@ public class Predator : MonoBehaviour
 
     void Attack()
     {
-        SwitchAnimation(State.Attacking);
+        State current = state;
+        state = State.Attacking;
+        SwitchAnimation(state);
+        state = current;
+        SwitchAnimation(state);
     }
     void Dead()
     {
         OnDead(this.gameObject);
         agent.speed = 0;
-        SwitchAnimation(State.Dead);
     }
 
     void GoHome()
     {
         agent.speed = walkingSpeed * speedFactor;
-        Vector3 randomPos = new Vector3(UnityEngine.Random.Range(-roamDistance, roamDistance), 0, UnityEngine.Random.Range(-roamDistance, roamDistance));
+        Vector3 randomPos = RandomSearch(origin.position, roamDistance);
         agent.SetDestination(origin.position + randomPos);
-        animator.SetBool("isWalking", true);
+        state = State.Walking;
+        SwitchAnimation(state);
     }
 
     public void Breed()
     {
-        GoHome();
-        isBreed = true;
+        isPregnant = false;
+        hasBreed = true;
         timeSinceLastBreed = 0;
-        SwitchAnimation(State.Idle);
+        breedFactor = .5f;
         OnSpawn();
+        isBreedNow = false;
 
     }
     ////////////////////////////////////////////////////////////////
     /// Switch the animation to the given state
     void SwitchAnimation(State currentState)
     {
-        animator.SetBool("Walking", currentState == State.Walking);
-        animator.SetBool("Running", currentState == State.Running);
-        animator.SetBool("Attacking", currentState == State.Attacking);
-        animator.SetBool("Dead", currentState == State.Dead);
+        animator.SetBool("isWalking", currentState == State.Walking);
+        animator.SetBool("isRunning", currentState == State.Running);
+        animator.SetBool("isAttacking", currentState == State.Attacking);
+        //animator.SetBool("Dead", currentState == State.Dead);
     }
 
     ////////////////////////////////////////////////////////////////
     ///Roaming, hunting with NavMeshAgent and vision sphere
 
-    void SimulationLoop()
-    {
-        if (actionTimer > 0)
-        {
-            actionTimer -= Time.deltaTime;
-        }
-        else
-        {
-            switchAction = true;
-        }
-
-        //
-        if (switchAction)
-        {
-
-        }
-
-    }
 
     ////////////////////////////////////////////////////////////////
 
@@ -433,24 +525,41 @@ public class Predator : MonoBehaviour
     {
         if (other.gameObject.tag == "Prey")
         {
-            Attack();
-            timeSinceLastMeal = 0;
+
+            Destroy(other.gameObject);
+
+            timeSinceLastMeal = 1;
             isHungry = false;
+            if (!isThirsty)
+            {
+                isGoHome = true;
+            }
+            state = State.Attacking;
+            SwitchAnimation(state);
+
         }
         if (other.gameObject.tag == "Predator")
         {
             if (other.gameObject.GetComponent<Predator>().isAcceptMate)
             {
-                timeSinceLastMate = 0;
+                timeSinceLastMate = 1;
                 isPregnant = true;
                 isAvailable = false;
+                isBreedNow = true;
+                hasBreed = true;
+                if (!isHungry && !isThirsty)
+                {
+                    isGoHome = true;
+                }
+
             }
         }
 
         if (other.gameObject.tag == "Water")
         {
-            timeSinceLastDrink = 0;
+            timeSinceLastDrink = 1;
             isThirsty = false;
+            if (!isHungry) isGoHome = true;
         }
 
 
@@ -462,6 +571,10 @@ public class Predator : MonoBehaviour
         randomDirection += currentPos;
         NavMeshHit navHit;
         NavMesh.SamplePosition(randomDirection, out navHit, radius, NavMesh.AllAreas);
+        if (!navHit.hit)
+        {
+            RandomSearch(currentPos, radius);
+        }
         return navHit.position;
     }
 
@@ -484,7 +597,6 @@ public class Predator : MonoBehaviour
         PregnantStat();
         SummerStat();
         RainStat();
-
     }
 
 }

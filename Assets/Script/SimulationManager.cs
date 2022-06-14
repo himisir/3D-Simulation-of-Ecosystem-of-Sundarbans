@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.AI;
 
 public class SimulationManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class SimulationManager : MonoBehaviour
 
     public static event Action AgeCounter;
     public static event Action Initialize;
+    public static event Action NewBornStat;
     public static event Action<GameObject> TigerOrigin;
     public static event Action<GameObject> DeerOrigin;
 
@@ -21,8 +23,8 @@ public class SimulationManager : MonoBehaviour
 
 
     public float dayDuration = 5;
-    public float minOffset = 10;
-    public float maxOffset = 10;
+    public float minOffset = 1;
+    public float maxOffset = 5;
     bool initialized;
     // Start is called before the first frame update
     void Start()
@@ -30,11 +32,13 @@ public class SimulationManager : MonoBehaviour
         StartCoroutine(Calender());
         Predator.OnSpawn += BreedTiger;
         Predator.OnDead += DeleteTiger;
+
         Prey.OnSpawn += BreedDeer;
         Prey.OnDead += DeleteDeer;
 
     }
-    void OnDestroy(){
+    void OnDestroy()
+    {
         Predator.OnSpawn -= BreedTiger;
         Predator.OnDead -= DeleteTiger;
         Prey.OnSpawn -= BreedDeer;
@@ -62,23 +66,37 @@ public class SimulationManager : MonoBehaviour
 
         }
     }
+    Vector3 RandomSearch(Vector3 currentPos, float radius)
+    {
+        Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
+        randomDirection += currentPos;
+        NavMeshHit navHit;
+        NavMesh.SamplePosition(randomDirection, out navHit, radius, NavMesh.AllAreas);
+        if (!navHit.hit)
+        {
+            RandomSearch(currentPos, radius);
+        }
+        return navHit.position;
+    }
 
     public void BreedTiger()
     {
-        int literSize = UnityEngine.Random.Range(1, 3);
+
+        int literSize = UnityEngine.Random.Range(1, 2);
         for (int i = 0; i < literSize; i++)
         {
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
-            Vector3 position = new Vector3(tigerOrigin.transform.position.x + range, tigerOrigin.transform.position.y, tigerOrigin.transform.position.z);
+            Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
+
             var tiger = Instantiate(predator, position, Quaternion.identity);
+            NewBornStat?.Invoke();
             predatorList.Add(tiger);
         }
-
 
     }
     public void BreedDeer()
     {
-        int literSize = UnityEngine.Random.Range(1, 3);
+        int literSize = UnityEngine.Random.Range(2, 4);
         for (int i = 0; i < literSize; i++)
         {
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
