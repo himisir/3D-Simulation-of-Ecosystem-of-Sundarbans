@@ -11,12 +11,12 @@ public class SimulationManager : MonoBehaviour
 
     public GameObject tigerOrigin;
     public GameObject deerOrigin;
+    public GameObject waterSource;
 
     public static event Action AgeCounter;
     public static event Action Initialize;
     public static event Action NewBornStat;
-    public static event Action<GameObject> TigerOrigin;
-    public static event Action<GameObject> DeerOrigin;
+    public static event Action<GameObject, GameObject, GameObject> Origin;
 
     public List<GameObject> deerList = new List<GameObject>();
     public List<GameObject> predatorList = new List<GameObject>();
@@ -25,6 +25,8 @@ public class SimulationManager : MonoBehaviour
     public float dayDuration = 5;
     public float minOffset = 1;
     public float maxOffset = 5;
+    public float initialDeerPopulation = 20;
+    public float initialTigerPopulation = 20;
     bool initialized;
     // Start is called before the first frame update
     void Start()
@@ -48,8 +50,7 @@ public class SimulationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        TigerOrigin?.Invoke(tigerOrigin);
-        DeerOrigin?.Invoke(deerOrigin);
+        Origin?.Invoke(tigerOrigin, deerOrigin, waterSource);
     }
 
     IEnumerator Calender()
@@ -58,6 +59,8 @@ public class SimulationManager : MonoBehaviour
         {
             if (!initialized)
             {
+               // InitializeTiger();
+                //InitializeDeer();
                 initialized = true;
                 Initialize?.Invoke();
             }
@@ -67,7 +70,7 @@ public class SimulationManager : MonoBehaviour
         }
     }
 
-
+    /*
     Vector3 RandomPosition(Vector3 origin, float radius)
     {
         Vector3 newPosition = new Vector3(UnityEngine.Random.Range(-radius, radius), origin.y, UnityEngine.Random.Range(-radius, radius));
@@ -77,7 +80,7 @@ public class SimulationManager : MonoBehaviour
         return newPosition;
     }
 
-
+*/
     Vector3 RandomSearch(Vector3 origin, float distance)
     {
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * distance;
@@ -89,6 +92,30 @@ public class SimulationManager : MonoBehaviour
         NavMesh.SamplePosition(randomDirection, out navHit, distance, NavMesh.AllAreas);
 
         return navHit.position;
+    }
+
+    void InitializeTiger()
+    {
+        for (int i = 0; initialTigerPopulation < 10; i++)
+        {
+            float range = UnityEngine.Random.Range(minOffset, maxOffset);
+
+            Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
+
+            var tiger = Instantiate(predator, position, Quaternion.identity);
+            NewBornStat?.Invoke();
+            predatorList.Add(tiger);
+        }
+    }
+    void InitializeDeer()
+    {
+        for (int i = 0; i < initialDeerPopulation; i++)
+        {
+            float range = UnityEngine.Random.Range(minOffset, maxOffset);
+            Vector3 position = RandomSearch(deerOrigin.transform.position, range);
+            var deer = Instantiate(prey, position, Quaternion.identity);
+            deerList.Add(deer);
+        }
     }
 
 

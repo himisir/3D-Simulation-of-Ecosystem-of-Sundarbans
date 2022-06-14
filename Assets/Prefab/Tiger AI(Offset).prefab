@@ -11312,7 +11312,7 @@ GameObject:
   - component: {fileID: 3523719929727792368}
   - component: {fileID: 3523719929727792369}
   - component: {fileID: 3523719929727792374}
-  - component: {fileID: 8551884292850916109}
+  - component: {fileID: 8551884292850916107}
   m_Layer: 0
   m_Name: Tiger AI(Offset)
   m_TagString: Predator
@@ -11397,11 +11397,11 @@ MonoBehaviour:
   hunger: 0
   thirst: 0
   breedCount: 0
-  walkingSpeed: 1
+  walkingSpeed: 3
   pregnantSpeed: 0.7
   summerSpeed: 1.5
   rainSpeed: 0.5
-  runningSpeed: 2
+  runningSpeed: 8
   visionRadius: 15
   attackRadius: 1
   maxTravelLimit: 30
@@ -11420,6 +11420,9 @@ MonoBehaviour:
   unfortunateDeath: 0
   isFindMate: 0
   isAvailable: 0
+  isChase: 0
+  isRoam: 0
+  chaseIndicator: 0
   timeSinceLastMeal: 0
   timeSinceLastDrink: 0
   timeSinceLastMate: 0
@@ -11461,7 +11464,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &8551884292850916109
+--- !u!65 &8551884292850916107
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11472,5 +11475,5 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.6857188, z: 1.29373}
-  m_Center: {x: 0, y: 0.15714061, z: 0.14686498}
+  m_Size: {x: 1, y: 0.8019874, z: 1.424057}
+  m_Center: {x: 0, y: 0.15679646, z: -0.007972717}
