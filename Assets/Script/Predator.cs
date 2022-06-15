@@ -229,6 +229,7 @@ public class Predator : MonoBehaviour
     }
     bool DestinationReached()
     {
+        if (agent == null) return false;
         if (!agent.pathPending)
         {
             if (agent.remainingDistance <= agent.stoppingDistance)
@@ -685,6 +686,7 @@ public class Predator : MonoBehaviour
 
     Vector3 RandomSearch(Vector3 currentPos, float radius)
     {
+        if (agent == null) return Vector3.zero;
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
         randomDirection += currentPos;
         NavMeshHit navHit;

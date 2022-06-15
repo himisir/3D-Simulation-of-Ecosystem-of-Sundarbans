@@ -34,11 +34,13 @@ public class Prey : MonoBehaviour
     public float walkingSpeed = 1f;
     public float summerSpeed = 1.5f;
     public float rainSpeed = .5f;
-    public float runningSpeed = 2f;
+    public float runningSpeed = 6f;
     public float visionRadius = 10f;
 
     public float maxTravelLimit = 20;
     public float roamDistance = 10;
+    public float eatDistance = 1;
+    public float runDistance = 20;
     public float breedFactor = 1;
     public float speedFactor = 1;
     float actionTimer;
@@ -131,12 +133,50 @@ public class Prey : MonoBehaviour
         SwitchAnimation(state);
         actionTimer = UnityEngine.Random.Range(0.2f, 2f);
     }
+    void OnDestroy()
+    {
+        SimulationManager.Initialize -= Initialization;
+        SimulationManager.AgeCounter -= CalenderSystem;
+        SimulationManager.Origin -= LocalRegionManager;
+    }
 
     void Update()
     {
         Logic();
         VisionCheck();
         Engine();
+
+    }
+    void Logic()
+    {
+        if (state == State.Idle)
+        {
+            if (actionTimer > 0)
+            {
+                actionTimer -= Time.deltaTime;
+            }
+            else
+            {
+                Debug.Log("Action is called");
+                if (ReachedDestination())
+                {
+                    Roam();
+                }
+                actionTimer = UnityEngine.Random.Range(4f, 10f);
+            }
+        }
+
+
+
+        if (isBreedNow)
+        {
+            Breed();
+            isBreedNow = false;
+        }
+        if (isThirsty)
+        {
+            FindWater();
+        }
 
 
     }
@@ -191,50 +231,51 @@ public class Prey : MonoBehaviour
     public void Death()
     {
         OnDead?.Invoke(this.gameObject);
+        Destroy(this.gameObject);
     }
 
     /// <param name="other">The other Collider involved in this collision.</param>
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Water")
-        {
-            agent.SetDestination(other.gameObject.transform.position);
-        }
+
+
         if (other.gameObject.tag == "Predator")
         {
             Flee(other.gameObject.transform);
+        }
+        else if (other.gameObject.tag == "Water")
+        {
+            if (isThirsty)
+            {
+                agent.SetDestination(other.gameObject.transform.position);
+            }
+
         }
     }
     void OnTriggerStay(Collider other)
     {
+
         if (other.gameObject.tag == "Predator")
         {
             Flee(other.gameObject.transform);
         }
-    }
-
-    void Logic()
-    {
-        if (ReachedDestination())
+        else if (other.gameObject.tag == "Water")
         {
-            if (actionTimer > 0)
+            if (isThirsty)
             {
-                actionTimer -= Time.deltaTime;
+                agent.SetDestination(other.gameObject.transform.position);
             }
-            else
-            {
-                //agent.ResetPath();
-                Roam();
-                actionTimer = UnityEngine.Random.Range(0.2f, 2f);
-            }
-
         }
     }
+
+
+
     void Flee(Transform enemy)
     {
-        Vector3 runTo = transform.position - enemy.position;
-        agent.SetDestination(transform.position + runTo);
+        agent.speed = runningSpeed;
+        Vector3 runTo = (transform.position - enemy.position).normalized * runDistance;
+        agent.SetDestination(runTo);
         state = State.Running;
         SwitchAnimation(state);
     }
@@ -247,8 +288,12 @@ public class Prey : MonoBehaviour
         {
             isThirsty = false;
             timeSinceLastDrink = 0;
-            //agent.ResetPath();
-            GoHome();
+            agent.ResetPath();
+            //GoHome();
+        }
+        if (other.gameObject.tag == "Predator")
+        {
+            Death();
         }
     }
 
@@ -295,19 +340,24 @@ public class Prey : MonoBehaviour
 
         if (timeSinceLastDrink > 1 || thirst >= 60)
         {
-            //FindWater();
+            FindWater();
 
         }
     }
 
     void Roam()
     {
-        if (!ReachedDestination()) return;
-        Vector3 targetPos = RandomSearch(transform.position, roamDistance);
+        Vector3 targetPos = RandomSearch(transform.position, eatDistance);
         agent.speed = walkingSpeed * speedFactor;
+        agent.SetDestination(targetPos);
         state = State.Walking;
         SwitchAnimation(state);
-        agent.SetDestination(targetPos);
+    }
+    void Eating()
+    {
+        agent.speed = 0;
+        state = State.Idle;
+        SwitchAnimation(state);
     }
 
     void Chase(Vector3 targetPos)
@@ -333,11 +383,15 @@ public class Prey : MonoBehaviour
 
     bool ReachedDestination()
     {
-        if (agent.pathPending)
+        if (!agent.pathPending)
         {
             if (agent.remainingDistance <= agent.stoppingDistance)
             {
-                return true;
+                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                {
+                    state = State.Idle;
+                    return true;
+                }
             }
         }
         return false;
