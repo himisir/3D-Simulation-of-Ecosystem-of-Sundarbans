@@ -1007,10 +1007,10 @@ GameObject:
   - component: {fileID: 5279627550856601043}
   - component: {fileID: 4759972635265992566}
   - component: {fileID: 4759972635265992567}
-  - component: {fileID: 4759972635265992565}
-  - component: {fileID: 4759972635265992562}
   - component: {fileID: 4759972635265992563}
   - component: {fileID: 4759972635265992560}
+  - component: {fileID: 1026095874}
+  - component: {fileID: 2093714427}
   m_Layer: 0
   m_Name: Deer AI(Offset)
   m_TagString: Prey
@@ -1027,8 +1027,8 @@ Transform:
   m_GameObject: {fileID: 4759972635265992553}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.35745966, z: 0.624}
-  m_LocalScale: {x: 0.13, y: 0.13, z: 0.13}
-  m_ConstrainProportionsScale: 1
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3888247061933952333}
   - {fileID: 8582347911584460802}
@@ -1066,9 +1066,9 @@ NavMeshAgent:
   m_GameObject: {fileID: 4759972635265992553}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 2.5
+  m_Radius: 1.23
   m_Speed: 3.5
-  m_Acceleration: 8
+  m_Acceleration: 30
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 0
@@ -1076,75 +1076,9 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2.85
-  m_BaseOffset: 0
+  m_BaseOffset: 2.75
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &4759972635265992565
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4759972635265992553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aed4ae18ec1f3b24b9869efa2ca5444b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  newBornScale: 0.13
-  age: 0
-  gender: 
-  hunger: 0
-  thirst: 0
-  breedCount: 0
-  walkingSpeed: 1
-  summerSpeed: 1.5
-  rainSpeed: 0.5
-  runningSpeed: 2
-  visionRadius: 10
-  maxTravelLimit: 20
-  roamDistance: 10
-  eatDistance: 1
-  runDistance: 20
-  breedFactor: 1
-  speedFactor: 1
-  range: 20
-  isPregnant: 0
-  isHungry: 0
-  isThirsty: 0
-  isDead: 0
-  isMate: 0
-  isGoHome: 0
-  isBreedNow: 0
-  hasBreed: 0
-  isAdult: 0
-  unfortunateDeath: 0
-  isAvailable: 0
-  isChase: 0
-  isRoam: 0
-  lifeTime: 1500
-  maxDaysWithoutFood: 20
-  maxDaysWithoutDrink: 2
-  breedCoolDownPeriod: 150
-  pregnancyPeriod: 200
-  femaleMaturity: 250
-  maleMaturity: 300
-  timeSinceLastDrink: 1
-  timeSinceLastBreed: 1
-  timeSinceLastMate: 1
---- !u!65 &4759972635265992562
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4759972635265992553}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.2369235, y: 3.4985301, z: 5.70821}
-  m_Center: {x: 0, y: 1.77, z: 0}
 --- !u!54 &4759972635265992563
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1154,8 +1088,8 @@ Rigidbody:
   m_GameObject: {fileID: 4759972635265992553}
   serializedVersion: 2
   m_Mass: 40
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Drag: 10
+  m_AngularDrag: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -1172,8 +1106,64 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 20
+  m_Radius: 50
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!136 &1026095874
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759972635265992553}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 3.53
+  m_Height: 6.671082
+  m_Direction: 1
+  m_Center: {x: 0.029423714, y: 2.85, z: 1.1321256}
+--- !u!114 &2093714427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4759972635265992553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aed4ae18ec1f3b24b9869efa2ca5444b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isFoodFound: 0
+  isWaterFound: 0
+  age: 0
+  gender: 
+  hunger: 0
+  thirst: 0
+  walkingSpeed: 10
+  runningSpeed: 50
+  fleeSpeed: 70
+  visionRadius: 40
+  roamDistance: 15
+  fleeDistance: 70
+  isPregnant: 0
+  isFlee: 0
+  isThirsty: 0
+  isDead: 0
+  isMate: 0
+  isBreedNow: 0
+  isAdult: 0
+  unfortunateDeath: 0
+  isChase: 0
+  isRoam: 0
+  isStuck: 0
+  timeSinceLastMeal: 1
+  timeSinceLastDrink: 1
+  timeSinceLastMate: 1
+  lifeTime: 150
+  maxDaysWithoutFood: 20
+  maxDaysWithoutDrink: 10
+  pregnancyPeriod: 5
 --- !u!1 &4787298904525690327
 GameObject:
   m_ObjectHideFlags: 0

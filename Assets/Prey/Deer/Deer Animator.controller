@@ -92,13 +92,13 @@ AnimatorStateMachine:
     m_Position: {x: 230, y: -70, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1095533969352938757}
-    m_Position: {x: 230, y: 40, z: 0}
+    m_Position: {x: 230, y: 80, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -4443857190074129628}
-    m_Position: {x: 520, y: -40, z: 0}
+    m_Position: {x: 580, y: -10, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -9215917332164414569}
-    m_Position: {x: 380, y: -130, z: 0}
+    m_Position: {x: 420, y: -180, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -222,7 +222,7 @@ AnimatorController:
   m_Name: Deer Animator
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: isDead
+  - m_Name: isWalking
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -234,7 +234,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: isWalking
+  - m_Name: isDead
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0

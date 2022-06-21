@@ -8,6 +8,8 @@ TagManager:
   - Prey
   - Water
   - Grass
+  - Tiger Origin
+  - Deer Origin
   layers:
   - Default
   - TransparentFX
@@ -16,9 +18,9 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
-  - 
-  - 
+  - Soil
+  - Grass
+  - Tree
   - 
   - 
   - 

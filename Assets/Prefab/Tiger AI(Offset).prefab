@@ -11312,7 +11312,7 @@ GameObject:
   - component: {fileID: 3523719929727792368}
   - component: {fileID: 3523719929727792369}
   - component: {fileID: 3523719929727792374}
-  - component: {fileID: 8551884292850916107}
+  - component: {fileID: 8377816857975929756}
   m_Layer: 0
   m_Name: Tiger AI(Offset)
   m_TagString: Predator
@@ -11329,8 +11329,8 @@ Transform:
   m_GameObject: {fileID: 3523719929727792381}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 7.1, y: 7.1, z: 7.1}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3523719929075238676}
   - {fileID: 3523719929075238666}
@@ -11366,9 +11366,9 @@ NavMeshAgent:
   m_GameObject: {fileID: 3523719929727792381}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.72
+  m_Radius: 0.33
   m_Speed: 3.5
-  m_Acceleration: 8
+  m_Acceleration: 20
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 0
@@ -11376,7 +11376,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 0.55
-  m_BaseOffset: 0.3
+  m_BaseOffset: 0.37
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &3523719929727792368
@@ -11391,50 +11391,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5a12d8cbd8eae648b08cfdf68704d5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  newBornScale: 0.1
+  isFoodFound: 0
+  isWaterFound: 0
   age: 0
   gender: 
   hunger: 0
   thirst: 0
-  breedCount: 0
-  walkingSpeed: 3
-  pregnantSpeed: 0.7
-  summerSpeed: 1.5
-  rainSpeed: 0.5
-  runningSpeed: 8
-  visionRadius: 15
-  attackRadius: 1
-  maxTravelLimit: 30
+  walkingSpeed: 10
+  runningSpeed: 20
+  visionRadius: 8
   roamDistance: 20
-  breedFactor: 0
   isPregnant: 0
   isHungry: 0
   isThirsty: 0
   isDead: 0
   isMate: 0
-  isGoHome: 0
-  isAcceptMate: 0
   isBreedNow: 0
-  hasBreed: 0
   isAdult: 0
   unfortunateDeath: 0
-  isFindMate: 0
-  isAvailable: 0
   isChase: 0
   isRoam: 0
-  chaseIndicator: 0
+  isStuck: 0
   timeSinceLastMeal: 0
   timeSinceLastDrink: 0
   timeSinceLastMate: 0
-  timeSinceLastBreed: 0
   lifeTime: 3000
   maxDaysWithoutFood: 14
-  maxDaysWithoutDrink: 3
-  breedCoolDownPeriod: 2500
-  pregnancyPeriod: 110
-  femaleMaturity: 1095
-  maleMaturity: 1700
-  memorySize: 5
+  maxDaysWithoutDrink: 14
+  pregnancyPeriod: 5
 --- !u!54 &3523719929727792369
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -11443,11 +11427,11 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3523719929727792381}
   serializedVersion: 2
-  m_Mass: 200
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Mass: 10
+  m_Drag: 10
+  m_AngularDrag: 1
   m_UseGravity: 1
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -11462,10 +11446,10 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 10
   m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &8551884292850916107
-BoxCollider:
+--- !u!136 &8377816857975929756
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -11474,6 +11458,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 0.8019874, z: 1.424057}
-  m_Center: {x: 0, y: 0.15679646, z: -0.007972717}
+  m_Radius: 0.4691373
+  m_Height: 0.9382747
+  m_Direction: 1
+  m_Center: {x: 0.05761533, y: 0.1523893, z: 0.31730485}
