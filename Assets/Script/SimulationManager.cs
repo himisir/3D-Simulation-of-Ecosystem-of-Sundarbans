@@ -19,7 +19,7 @@ public class SimulationManager : MonoBehaviour
     public static event Action<GameObject, GameObject, GameObject> Origin;
     public static event Action<int, int, int> SimulationInfo;
 
-    public List<GameObject> deerList = new List<GameObject>();
+    public List<GameObject> preyList = new List<GameObject>();
     public List<GameObject> predatorList = new List<GameObject>();
 
     public bool isSimulationOn = false;
@@ -60,7 +60,7 @@ public class SimulationManager : MonoBehaviour
         Time.timeScale = timeScale;
         Origin?.Invoke(tigerOrigin, deerOrigin, waterSource);
         tigerPopulation = predatorList.Count;
-        deerPopulation = deerList.Count;
+        deerPopulation = preyList.Count;
         if (tigerPopulation > 0 || deerPopulation > 0)
         {
             SimulationInfo?.Invoke(days, tigerPopulation, deerPopulation);
@@ -76,10 +76,11 @@ public class SimulationManager : MonoBehaviour
         {
             if (!initialized)
             {
+
+                initialized = true;
+
                 InitializeTiger();
                 InitializeDeer();
-                initialized = true;
-                Initialize?.Invoke();
             }
             AgeCounter?.Invoke();
             days++;
@@ -108,9 +109,8 @@ public class SimulationManager : MonoBehaviour
             float range = UnityEngine.Random.Range(minOffset * 2, maxOffset * 3);
             Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
             var tiger = Instantiate(predator, position, Quaternion.identity);
-            //InitializePopulation(GameObject animal);
-            NewBornStat?.Invoke();
             predatorList.Add(tiger);
+            Initialize?.Invoke();
         }
     }
     void InitializeDeer()
@@ -120,7 +120,8 @@ public class SimulationManager : MonoBehaviour
             float range = UnityEngine.Random.Range(minOffset * 2, maxOffset * 3);
             Vector3 position = RandomSearch(deerOrigin.transform.position, range);
             var deer = Instantiate(prey, position, Quaternion.identity);
-            deerList.Add(deer);
+            Initialize?.Invoke();
+            preyList.Add(deer);
         }
     }
 
@@ -131,9 +132,7 @@ public class SimulationManager : MonoBehaviour
         for (int i = 0; i < literSize; i++)
         {
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
-
             Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
-
             var tiger = Instantiate(predator, position, Quaternion.identity);
             NewBornStat?.Invoke();
             predatorList.Add(tiger);
@@ -148,13 +147,15 @@ public class SimulationManager : MonoBehaviour
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
             Vector3 position = RandomSearch(deerOrigin.transform.position, range);
             var deer = Instantiate(prey, position, Quaternion.identity);
-            deerList.Add(deer);
+            NewBornStat?.Invoke();
+            preyList.Add(deer);
         }
     }
 
     public void DeleteDeer(GameObject deer)
     {
-        deerList.Remove(deer);
+        Debug.Log("Deer is dead");
+        preyList.Remove(deer);
         Destroy(deer);
     }
 

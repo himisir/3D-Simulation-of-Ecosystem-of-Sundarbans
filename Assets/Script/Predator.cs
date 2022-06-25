@@ -177,10 +177,7 @@ public class Predator : MonoBehaviour
         timeSinceLastDrink++;
         timeSinceLastMeal++;
         HungerThirst();
-        if (isPregnant)
-        {
-            timeSinceLastMate++;
-        }
+        timeSinceLastMate++;
     }
     void VisionCheck()
     {

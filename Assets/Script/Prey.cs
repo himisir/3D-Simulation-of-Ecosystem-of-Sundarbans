@@ -119,7 +119,7 @@ public class Prey : MonoBehaviour
         animator = GetComponent<Animator>();
         int random = UnityEngine.Random.Range(0, 2);
         gender = (random == 1) ? "male" : "female";
-        currentState = State.Idle;
+        // currentState = State.Idle;
         SimulationManager.Initialize += Initialization;
         SimulationManager.AgeCounter += CalenderSystem;
         SimulationManager.Origin += LocalRegionManager;
@@ -172,10 +172,8 @@ public class Prey : MonoBehaviour
         timeSinceLastDrink++;
         timeSinceLastMeal++;
         HungerThirst();
-        if (isPregnant)
-        {
-            timeSinceLastMate++;
-        }
+
+        timeSinceLastMate++;
     }
     void VisionCheck()
     {
@@ -195,7 +193,7 @@ public class Prey : MonoBehaviour
         Debug.Log(currentState);
         VisionCheck();
         Engine();
-        SwitchState(currentState);
+        // SwitchState(currentState);
         SwitchAnimation(animationState);
     }
 
@@ -211,8 +209,6 @@ public class Prey : MonoBehaviour
         {
             isThirsty = true;
         }
-        ////////////////////////////////
-        ///Check if the predator is dead
         if (age >= lifeTime)
         {
             Debug.Log("Died at age: " + age);
@@ -268,29 +264,35 @@ public class Prey : MonoBehaviour
 
         if (isDead)
         {
-            currentState = State.Dead;
+            Death();
+            //currentState = State.Dead;
         }
         if (isFlee)
         {
-            currentState = State.Flee;
+            Flee(fleeFrom);
+            //currentState = State.Flee;
         }
         else if (isThirsty)
         {
-            currentState = State.Thirsty;
+            FindWater();
+            // currentState = State.Thirsty;
         }
         else if (isBreedNow)
         {
+            Breed();
             isBreedNow = false;
-            currentState = State.Breed;
+            //currentState = State.Breed;
         }
         else if (isChase)
         {
-            currentState = State.Chase;
+            Chase(target);
+            // currentState = State.Chase;
         }
 
         else
         {
-            currentState = State.Idle;
+            Idle();
+            //currentState = State.Idle;
         }
     }
 
@@ -300,7 +302,6 @@ public class Prey : MonoBehaviour
         animationState = AnimationState.Walking;
         if (timer > 0)
         {
-            //animationState = AnimationState.Idle;
             timer -= Time.deltaTime;
         }
         else
@@ -310,17 +311,13 @@ public class Prey : MonoBehaviour
                 timer = UnityEngine.Random.Range(1f, 6f);
                 float range = UnityEngine.Random.Range(5, 200);
                 agent.SetDestination(RandomSearch(transform.position, range));
-                animationState = AnimationState.Idle;
             }
             else
             {
                 animationState = AnimationState.Walking;
                 agent.SetDestination(agent.destination);
             }
-
-
         }
-
     }
 
     void IsStuck()
@@ -336,8 +333,6 @@ public class Prey : MonoBehaviour
         }
         isStuck = true;
     }
-    ///////////////////////////////////////////////////////////////////////////////////////
-    /// Methods to check if the predator is hungry, thirsty, pregnant, or dead
     void HungerThirst()
     {
         hunger += (timeSinceLastMeal * breedFactor / maxDaysWithoutFood) * 100;
