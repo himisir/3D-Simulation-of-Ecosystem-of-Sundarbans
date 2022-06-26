@@ -490,6 +490,7 @@ public class Predator : MonoBehaviour
     }
     public float waterSourceReachDistance = 5f; //Checks if the predator is close enough to the water source
     float chaseDistance;
+    public float killDistance = 3f;
     void OnTriggerStay(Collider other)
     {
         /*
@@ -516,6 +517,15 @@ public class Predator : MonoBehaviour
         else  */
         if (other.gameObject.tag == "Prey" && isHungry)
         {
+            if (Vector3.Distance(transform.position, other.gameObject.transform.position) <= killDistance)
+            {
+                OnKill?.Invoke(other.gameObject);
+                isFoodFound = false;
+                hunger = 0;
+                timeSinceLastMeal = 0;
+                isHungry = false;
+                isChase = false;
+            }
             if (Vector3.Distance(transform.position, other.gameObject.transform.position) < chaseDistance)
             {
                 target = other.gameObject.transform.position;
@@ -544,8 +554,8 @@ public class Predator : MonoBehaviour
         {
             isThirsty = false;
             isWaterFound = false;
-            thirst = 1;
-            timeSinceLastDrink = 1;
+            thirst = 0;
+            timeSinceLastDrink = 0;
             isChase = false;
         }
         if (collision.gameObject.tag == "Prey")

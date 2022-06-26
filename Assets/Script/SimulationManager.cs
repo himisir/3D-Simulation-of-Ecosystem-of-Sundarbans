@@ -47,8 +47,8 @@ public class SimulationManager : MonoBehaviour
         Predator.OnSpawn += BreedTiger;
         Prey.OnSpawn += BreedDeer;
         Prey.OnDeath += DeleteDeer;
-        Predator.OnDeath += DeleteTiger;
         Predator.OnKill += DeleteDeer;
+        Predator.OnDeath += DeleteTiger;
 
     }
     void OnDestroy()
