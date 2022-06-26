@@ -481,7 +481,7 @@ public class Predator : MonoBehaviour
             target = other.gameObject.transform.position;
             isWaterFound = true;
         }
-        else if (other.gameObject.tag == "Prey" && isHungry)
+        else if (other.gameObject.tag == "Prey" && (UnityEngine.Random.Range(1f, 101f) > 99 || isHungry))
         {
             target = other.gameObject.transform.position;
             isChase = true;

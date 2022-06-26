@@ -380,7 +380,7 @@ public class Prey : MonoBehaviour
     void Flee(Vector3 _fleeFrom)
     {
         agent.speed = fleeSpeed * speedFactor;
-        float range = UnityEngine.Random.Range(0.9f, 3f);
+        float range = UnityEngine.Random.Range(0.5f, 1f);
         Vector3 runTo = ((transform.position - _fleeFrom) * range).normalized * fleeDistance;
         agent.SetDestination(runTo);
     }

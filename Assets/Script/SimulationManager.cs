@@ -118,7 +118,7 @@ public class SimulationManager : MonoBehaviour
         for (int i = 0; i < initialDeerPopulation; i++)
         {
             Debug.Log("Deer Spawned" + i);
-            float range = UnityEngine.Random.Range(minOffset * 2, maxOffset * 3);
+            float range = UnityEngine.Random.Range(-minOffset, maxOffset);
             Vector3 position = RandomSearch(deerOrigin.transform.position, range);
             var deer = Instantiate(prey, position, Quaternion.identity);
             deer.GetComponent<Prey>().Initialization();
@@ -131,7 +131,7 @@ public class SimulationManager : MonoBehaviour
         int literSize = UnityEngine.Random.Range(1, 2);
         for (int i = 0; i < literSize; i++)
         {
-            float range = UnityEngine.Random.Range(minOffset, maxOffset);
+            float range = UnityEngine.Random.Range(-minOffset, maxOffset);
             Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
             var tiger = Instantiate(predator, position, Quaternion.identity);
             tiger.GetComponent<Predator>().ParameterInitializeForNewBreed();
@@ -144,7 +144,7 @@ public class SimulationManager : MonoBehaviour
         int literSize = UnityEngine.Random.Range(1, 2);
         for (int i = 0; i < literSize; i++)
         {
-            float range = UnityEngine.Random.Range(minOffset, maxOffset);
+            float range = UnityEngine.Random.Range(-minOffset, maxOffset);
             Vector3 position = RandomSearch(deerOrigin.transform.position, range);
             var deer = Instantiate(prey, position, Quaternion.identity);
             deer.GetComponent<Prey>().ParameterInitializeForNewBreed();
