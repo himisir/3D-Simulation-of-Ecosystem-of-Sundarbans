@@ -1,4 +1,4 @@
-using System.Collections;
+
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -117,12 +117,14 @@ public class Prey : MonoBehaviour
         visionSphere = GetComponent<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        int random = UnityEngine.Random.Range(0, 2);
-        gender = (random == 1) ? "male" : "female";
-        // currentState = State.Idle;
+        currentState = State.Idle;
+        waterSource = GameObject.FindGameObjectWithTag("Water Source Deer").transform;
+        origin = GameObject.FindGameObjectWithTag("Deer Origin").transform;
+
+        agent.speed = walkingSpeed;
+        // SimulationManager.Origin += LocalRegionManager;
         SimulationManager.Initialize += Initialization;
         SimulationManager.AgeCounter += CalenderSystem;
-        SimulationManager.Origin += LocalRegionManager;
         SimulationManager.NewBornStat += ParameterInitializeForNewBreed;
 
     }
@@ -130,11 +132,13 @@ public class Prey : MonoBehaviour
     {
         SimulationManager.AgeCounter -= CalenderSystem;
         SimulationManager.Initialize -= Initialization;
-        SimulationManager.Origin -= LocalRegionManager;
+        //SimulationManager.Origin -= LocalRegionManager;
         SimulationManager.NewBornStat -= ParameterInitializeForNewBreed;
     }
     public void ParameterInitializeForNewBreed()
     {
+        int random = UnityEngine.Random.Range(0, 2);
+        gender = (random == 1) ? "male" : "female";
         age = 0;
         thirst = 1;
         isPregnant = false;
@@ -149,7 +153,10 @@ public class Prey : MonoBehaviour
     public void Initialization()
     {
 
-        thirst = 1;
+        int random = UnityEngine.Random.Range(0, 2);
+        gender = (random == 1) ? "male" : "female";
+        hunger = 0;
+        thirst = 0;
         timeSinceLastDrink = UnityEngine.Random.Range(0, maxDaysWithoutDrink);
         maxDaysWithoutDrink = UnityEngine.Random.Range(maxDaysWithoutDrink, maxDaysWithoutDrink + 3);
         if (gender == "female")
@@ -159,10 +166,16 @@ public class Prey : MonoBehaviour
         }
     }
     //Action Event Subscriber
-    void LocalRegionManager(GameObject tigerOrigin, GameObject deerOrigin, GameObject _waterSource)
+    public void LocalRegionManager(GameObject tigerOrigin, GameObject deerOrigin, GameObject _waterSourceDeer, GameObject _waterSourceTiger)
     {
-        origin = tigerOrigin.transform;
-        waterSource = _waterSource.transform;
+        if (deerOrigin != null)
+        {
+            origin = deerOrigin.transform;
+        }
+        if (_waterSourceTiger != null)
+        {
+            waterSource = _waterSourceDeer.transform;
+        }
     }
 
     //Action Event Subscriber
@@ -172,11 +185,11 @@ public class Prey : MonoBehaviour
         timeSinceLastDrink++;
         timeSinceLastMeal++;
         HungerThirst();
-
-        timeSinceLastMate++;
+        if (gender == "female") timeSinceLastMate++;
     }
     void VisionCheck()
     {
+        dangerDistance = visionRadius - 2;
         visionSphere.radius = visionRadius;
         visionSphere.isTrigger = true;
     }
@@ -184,24 +197,23 @@ public class Prey : MonoBehaviour
 
     void Update()
     {
-        if (Vector3.Distance(transform.position, waterSource.position) <= 5)
-        {
-            isThirsty = false;
-            thirst = 1;
-            isChase = false;
-        }
-        Debug.Log(currentState);
+
+        //Debug.Log(currentState);
+
         VisionCheck();
         Engine();
+        StateCheck();
         // SwitchState(currentState);
         SwitchAnimation(animationState);
+        WaterConsumption();
+
     }
 
 
 
     void Engine()
     {
-        if (timeSinceLastMate > pregnancyPeriod)
+        if (gender == "female" && timeSinceLastMate > pregnancyPeriod)
         {
             isBreedNow = true;
         }
@@ -235,29 +247,18 @@ public class Prey : MonoBehaviour
     {
         switch (currentState)
         {
-            case State.Dead:
-                Death();
-                break;
             case State.Flee:
                 Flee(fleeFrom);
-                break;
-            case State.Breed:
-                Breed();
-                break;
-            case State.Idle:
-                Idle();
-                break;
-            case State.Thirsty:
-                FindWater();
-                break;
-            case State.Chase:
-                Chase(target);
                 break;
             case State.Roam:
                 Roam();
                 break;
+            case State.Idle:
+                Idle();
+                break;
         }
     }
+
 
     void StateCheck()
     {
@@ -267,28 +268,29 @@ public class Prey : MonoBehaviour
             Death();
             //currentState = State.Dead;
         }
-        if (isFlee)
+        else if (isFlee)
         {
             Flee(fleeFrom);
             //currentState = State.Flee;
         }
-        else if (isThirsty)
-        {
-            FindWater();
-            // currentState = State.Thirsty;
-        }
         else if (isBreedNow)
         {
-            Breed();
             isBreedNow = false;
+            Breed();
+
             //currentState = State.Breed;
         }
+        else if (isThirsty)
+        {
+            Chase(waterSource.position);
+            // currentState = State.Thirsty;
+        }
+
         else if (isChase)
         {
             Chase(target);
             // currentState = State.Chase;
         }
-
         else
         {
             Idle();
@@ -297,19 +299,21 @@ public class Prey : MonoBehaviour
     }
 
     float timer = 3;
+    public float targetReachedDistance = 3;
     void Idle()
     {
-        animationState = AnimationState.Walking;
+
         if (timer > 0)
         {
+            animationState = AnimationState.Walking;
             timer -= Time.deltaTime;
         }
         else
         {
-            if (agent.remainingDistance <= agent.stoppingDistance)
+            if (agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance || isStuck)
             {
                 timer = UnityEngine.Random.Range(1f, 6f);
-                float range = UnityEngine.Random.Range(5, 200);
+                float range = UnityEngine.Random.Range(roamDistance * 2, roamDistance * 5);
                 agent.SetDestination(RandomSearch(transform.position, range));
             }
             else
@@ -319,19 +323,27 @@ public class Prey : MonoBehaviour
             }
         }
     }
-
+    float stuckTime = 10f;
     void IsStuck()
     {
-        float stuckTime = 2f;
-        while (stuckTime > 0)
+
+        if (stuckTime > 0)
         {
-            if (!(agent.velocity.sqrMagnitude == 0f))
+            if ((agent.pathPending && agent.remainingDistance > agent.stoppingDistance + targetReachedDistance) || agent.isStopped)
             {
-                return;
+                stuckTime -= Time.deltaTime;
             }
-            stuckTime -= Time.deltaTime;
+            else
+            {
+                isStuck = false;
+            }
+
         }
-        isStuck = true;
+        else
+        {
+            isStuck = true;
+            stuckTime = 10;
+        }
     }
     void HungerThirst()
     {
@@ -350,12 +362,15 @@ public class Prey : MonoBehaviour
     public bool pathOutdated;
     void Roam()
     {
-        isStuck = false;
-        agent.speed = walkingSpeed * speedFactor;
-        currentState = State.Idle;
-        animationState = AnimationState.Walking;
-        agent.SetDestination(RandomSearch(transform.position, roamDistance));
+        if (!(agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance)) agent.SetDestination(agent.destination);
+        else
+        {
+            agent.speed = walkingSpeed * speedFactor;
+            animationState = AnimationState.Walking;
+            agent.SetDestination(RandomSearch(transform.position, roamDistance));
+        }
     }
+
     void Chase(Vector3 targetPos)
     {
         agent.speed = runningSpeed * speedFactor;
@@ -371,21 +386,22 @@ public class Prey : MonoBehaviour
     }
     void FindWater()
     {
-        if (!isWaterFound) target = waterSource.position;
-        currentState = State.Chase;
+        target = waterSource.position;
+        isChase = true;
         Debug.Log("FindWater");
     }
     public void Death()
     {
-        Debug.Log("Prey Died");
-        Debug.Log("Predator is dead");
+        Debug.Log("Prey is dead");
         OnDeath(this.gameObject);
     }
     public void Breed()
     {
+
+        isPregnant = false;
         isBreedNow = false;
+        timeSinceLastMate = 0;
         OnSpawn();
-        currentState = State.Idle;
     }
     ////////////////////////////////////////////////////////////////
     /// Switch the animation to the given state
@@ -412,15 +428,14 @@ public class Prey : MonoBehaviour
 
     Vector3 RandomSearch(Vector3 currentPos, float radius)
     {
-        if (agent == null) return Vector3.zero;
-        radius = UnityEngine.Random.Range(radius - 10, radius + 10);
+        if (agent == null) return transform.position;
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
         randomDirection += currentPos;
-        float angle = Vector3.Angle(currentPos, randomDirection);
         NavMeshHit navHit;
         NavMesh.SamplePosition(randomDirection, out navHit, radius, -1);
         return navHit.position;
     }
+
     bool DestinationReached()
     {
         if (agent == null) return false;
@@ -436,61 +451,67 @@ public class Prey : MonoBehaviour
         }
         return false;
     }
+    public float waterConsumptionDistance = 5f;
+    void WaterConsumption()
+    {
+        waterConsumptionDistance = waterSourceReachDistance;
+        if (Vector3.Distance(transform.position, waterSource.position) <= waterConsumptionDistance)
+        {
+            isThirsty = false;
+            isWaterFound = false;
+            thirst = 0;
+            timeSinceLastDrink = 0;
+            isChase = false;
+        }
 
-
+    }
 
     ///Triggers and Collisions //Lets "false" every bool after the triggered Method() is called
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag == "Predator")
-        {
-            fleeFrom = other.gameObject.transform.position;
-            isFlee = true;
-        }
-        else if (other.gameObject.tag == "Water" && isThirsty)
-        {
-            target = other.gameObject.transform.position;
-            isWaterFound = true;
-        }
-    }
+    public float dangerDistance;
+    public float waterSourceReachDistance = 5f;
+    public float killDistance = 1f;
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.tag == "Predator")
         {
+            if (Vector3.Distance(transform.position, other.transform.position) < dangerDistance)
+            {
+                isFlee = true;
+                fleeFrom = other.transform.position;
+            }
 
-            fleeFrom = other.gameObject.transform.position;
-            isFlee = true;
+            else isFlee = false;
+        }
+
+        /*
+        else if (other.gameObject.tag == "Water" && isThirsty)
+        {
+            if (Vector3.Distance(transform.position, other.gameObject.transform.position) < waterSourceReachDistance)
+            {
+                isThirsty = false;
+                isWaterFound = false;
+                thirst = 0;
+                timeSinceLastDrink = 0;
+                isChase = false;
+            }
+            else
+            {
+                target = other.gameObject.transform.position;
+                currentState = State.Chase;
+            }
 
         }
+        */
 
     }
     //Might face issues with the conditions in the if statements
-    void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.tag == "Predator")
-        {
-            isFlee = false;
-            currentState = State.Roam;
-        }
-    }
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Predator"))
+        if (collision.gameObject.tag == "Predator")
         {
-            Debug.Log("Got Eaten by Predator");
+            Debug.Log("Prey is dead from collision");
             isDead = true;
         }
-        if (collision.gameObject.CompareTag("Water"))
-        {
-            Debug.Log("Water is consumed");
-            isThirsty = false;
-            isWaterFound = false;
-            thirst = 0;
-            timeSinceLastDrink = 1;
-            isChase = false;
-            currentState = State.Roam;
-        }
-
     }
 
 
