@@ -770,8 +770,8 @@ MonoBehaviour:
   timeSinceLastMate: 1
   lifeTime: 150
   maxDaysWithoutFood: 20
-  maxDaysWithoutDrink: 10
-  pregnancyPeriod: 5
+  maxDaysWithoutDrink: 5
+  pregnancyPeriod: 18
   targetReachedDistance: 3
   pathOutdated: 0
   waterConsumptionDistance: 5
