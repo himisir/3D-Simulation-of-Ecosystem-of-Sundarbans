@@ -114,14 +114,15 @@ public class Prey : MonoBehaviour
 
     void Start()
     {
+
         visionSphere = GetComponent<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         currentState = State.Idle;
         waterSource = GameObject.FindGameObjectWithTag("Water Source Deer").transform;
         origin = GameObject.FindGameObjectWithTag("Deer Origin").transform;
-
         agent.speed = walkingSpeed;
+
         // SimulationManager.Origin += LocalRegionManager;
         SimulationManager.Initialize += Initialization;
         SimulationManager.AgeCounter += CalenderSystem;
@@ -177,6 +178,25 @@ public class Prey : MonoBehaviour
             waterSource = _waterSourceDeer.transform;
         }
     }
+    Vector3 waterSourcePosition()
+    {
+        GameObject[] sources;
+        sources = GameObject.FindGameObjectsWithTag("Water");
+        GameObject closest = null;
+        float distance = Mathf.Infinity;
+        Vector3 position = transform.position;
+        foreach (GameObject source in sources)
+        {
+            Vector3 diff = source.transform.position - position;
+            float curDistance = diff.sqrMagnitude;
+            if (curDistance < distance)
+            {
+                closest = source;
+                distance = curDistance;
+            }
+        }
+        return closest.transform.position;
+    }
 
     //Action Event Subscriber
     public void CalenderSystem()
@@ -199,7 +219,6 @@ public class Prey : MonoBehaviour
     {
 
         //Debug.Log(currentState);
-
         VisionCheck();
         Engine();
         StateCheck();
@@ -282,7 +301,7 @@ public class Prey : MonoBehaviour
         }
         else if (isThirsty)
         {
-            Chase(waterSource.position);
+            Chase(waterSourcePosition());
             // currentState = State.Thirsty;
         }
 
@@ -432,7 +451,7 @@ public class Prey : MonoBehaviour
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
         randomDirection += currentPos;
         NavMeshHit navHit;
-        NavMesh.SamplePosition(randomDirection, out navHit, radius, -1);
+        NavMesh.SamplePosition(randomDirection, out navHit, radius, 1);
         return navHit.position;
     }
 
@@ -483,8 +502,7 @@ public class Prey : MonoBehaviour
             else isFlee = false;
         }
 
-        /*
-        else if (other.gameObject.tag == "Water" && isThirsty)
+        else if (other.gameObject.tag == "Water")
         {
             if (Vector3.Distance(transform.position, other.gameObject.transform.position) < waterSourceReachDistance)
             {
@@ -493,15 +511,9 @@ public class Prey : MonoBehaviour
                 thirst = 0;
                 timeSinceLastDrink = 0;
                 isChase = false;
-            }
-            else
-            {
-                target = other.gameObject.transform.position;
-                currentState = State.Chase;
-            }
+            }   
 
         }
-        */
 
     }
     //Might face issues with the conditions in the if statements

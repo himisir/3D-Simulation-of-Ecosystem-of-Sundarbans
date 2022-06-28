@@ -771,12 +771,12 @@ MonoBehaviour:
   lifeTime: 150
   maxDaysWithoutFood: 20
   maxDaysWithoutDrink: 5
-  pregnancyPeriod: 18
+  pregnancyPeriod: 6
   targetReachedDistance: 3
   pathOutdated: 0
-  waterConsumptionDistance: 5
+  waterConsumptionDistance: 8
   dangerDistance: 15
-  waterSourceReachDistance: 5
+  waterSourceReachDistance: 8
   killDistance: 1
 --- !u!1 &3161993239464388157
 GameObject:

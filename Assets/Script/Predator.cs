@@ -119,7 +119,7 @@ public class Predator : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         origin = GameObject.Find("Tiger Origin").transform;
-        waterSource = GameObject.Find("Water Source Tiger").transform;
+        //waterSource = GameObject.Find("Water Source Tiger").transform;
         agent.speed = walkingSpeed;
         currentState = State.Idle;
         SimulationManager.Initialize += Initialization;
@@ -178,7 +178,7 @@ public class Predator : MonoBehaviour
         }
         if (_waterSourceTiger != null)
         {
-            waterSource = _waterSourceTiger.transform;
+           // waterSource = _waterSourceTiger.transform;
         }
     }
 
@@ -277,7 +277,7 @@ public class Predator : MonoBehaviour
         }
         else if (isThirsty)
         {
-            Chase(waterSource.position);
+            Chase(waterSourcePosition());
         }
 
         else if (isChase)
@@ -425,7 +425,7 @@ public class Predator : MonoBehaviour
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * radius;
         randomDirection += currentPos;
         NavMeshHit navHit;
-        NavMesh.SamplePosition(randomDirection, out navHit, radius, -1);
+        NavMesh.SamplePosition(randomDirection, out navHit, radius, 1);
         return navHit.position;
     }
     bool DestinationReached()
@@ -472,6 +472,33 @@ public class Predator : MonoBehaviour
         }
 
     }
+    /*
+    NavMeshPath path;
+    path = target; 
+    if (path.status == NavMeshPathStatus.PathInvalid || path.status == NavMeshPathStatus.PathPartial) {
+   // Target is unreachable
+}
+    */
+    Vector3 waterSourcePosition()
+    {
+        GameObject[] sources;
+        sources = GameObject.FindGameObjectsWithTag("Water");
+        GameObject closest = null;
+        float distance = Mathf.Infinity;
+        Vector3 position = transform.position;
+        foreach (GameObject source in sources)
+        {
+            Vector3 diff = source.transform.position - position;
+            float curDistance = diff.sqrMagnitude;
+            if (curDistance < distance)
+            {
+                closest = source;
+                distance = curDistance;
+            }
+        }
+        waterSource = closest.transform;
+        return closest.transform.position;
+    }
 
     ///Triggers and Collisions //Lets "false" every bool after the triggered Method() is called
     void OnTriggerEnter(Collider other)
@@ -493,28 +520,18 @@ public class Predator : MonoBehaviour
     public float killDistance = 3f;
     void OnTriggerStay(Collider other)
     {
-        /*
-        if (other.gameObject.tag == "Water" && isThirsty)
+        if (other.gameObject.tag == "Water")
         {
-             if (Vector3.Distance(transform.position, other.gameObject.transform.position) < waterSourceReachDistance)
-             {
-                 isThirsty = false;
-                 isWaterFound = false;
-                 thirst = 0;
-                 timeSinceLastDrink = 0;
-                 isChase = false;
-             }
-
-             else
-             {
-                 target = other.gameObject.transform.position;
-                 isWaterFound = true;
-             }
-            
+            if (Vector3.Distance(transform.position, other.gameObject.transform.position) < waterSourceReachDistance)
+            {
+                isThirsty = false;
+                isWaterFound = false;
+                thirst = 0;
+                timeSinceLastDrink = 0;
+                isChase = false;
+            }
 
         }
-
-        else  */
         if (other.gameObject.tag == "Prey" && isHungry)
         {
             if (Vector3.Distance(transform.position, other.gameObject.transform.position) <= killDistance)
@@ -566,7 +583,6 @@ public class Predator : MonoBehaviour
             timeSinceLastMeal = 1;
             isHungry = false;
             isChase = false;
-            // currentState = State.Idle;
         }
 
     }

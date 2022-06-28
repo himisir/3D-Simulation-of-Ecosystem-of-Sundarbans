@@ -8649,10 +8649,10 @@ MonoBehaviour:
   lifeTime: 300
   maxDaysWithoutFood: 14
   maxDaysWithoutDrink: 4
-  pregnancyPeriod: 12
-  targetReachedDistance: 1
-  waterConsumptionDistance: 5
-  waterSourceReachDistance: 5
+  pregnancyPeriod: 6
+  targetReachedDistance: 2
+  waterConsumptionDistance: 8
+  waterSourceReachDistance: 8
   killDistance: 1
 --- !u!54 &409339906363256944
 Rigidbody:
