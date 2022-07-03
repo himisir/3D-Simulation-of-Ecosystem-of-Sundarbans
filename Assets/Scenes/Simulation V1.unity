@@ -6017,8 +6017,6 @@ MonoBehaviour:
   prey: {fileID: 3161993239401689978, guid: 5a82a0376a6f8364686e109941458356, type: 3}
   tigerOrigin: {fileID: 1668405038}
   deerOrigin: {fileID: 2046251386}
-  waterSourceTiger: {fileID: 1433991103}
-  waterSourceDeer: {fileID: 1413865281}
   waterSources: []
   preyList: []
   predatorList: []
@@ -6026,12 +6024,12 @@ MonoBehaviour:
   dayDuration: 24
   minOffset: 5
   maxOffset: 10
-  initialDeerPopulation: 15
+  initialDeerPopulation: 0
   initialTigerPopulation: 10
   days: 0
   tigerPopulation: 0
   deerPopulation: 0
-  timeScale: 1
+  timeScale: 10
 --- !u!1 &1923032799
 GameObject:
   m_ObjectHideFlags: 0
@@ -7475,7 +7473,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 409339906363256948, guid: c323df40366c4754781993f07c86fc22, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 654.5
+      value: 791
       objectReference: {fileID: 0}
     - target: {fileID: 409339906363256948, guid: c323df40366c4754781993f07c86fc22, type: 3}
       propertyPath: m_LocalPosition.y
@@ -7483,7 +7481,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 409339906363256948, guid: c323df40366c4754781993f07c86fc22, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 237.8
+      value: 437
       objectReference: {fileID: 0}
     - target: {fileID: 409339906363256948, guid: c323df40366c4754781993f07c86fc22, type: 3}
       propertyPath: m_LocalRotation.w

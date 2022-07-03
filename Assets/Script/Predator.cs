@@ -110,7 +110,7 @@ public class Predator : MonoBehaviour
 
     public static event Action<GameObject> OnDeath;
     public static event Action<GameObject> OnKill;
-    public static event Action OnSpawn;
+    public static event Action<GameObject> OnSpawn;
 
     void Start()
     {
@@ -155,7 +155,7 @@ public class Predator : MonoBehaviour
     }
     public void Initialization()
     {
-        int random = UnityEngine.Random.Range(0, 2);
+        int random = UnityEngine.Random.Range(0, 3);
         gender = (random == 1) ? "male" : "female";
         hunger = 0;
         thirst = 0;
@@ -166,7 +166,7 @@ public class Predator : MonoBehaviour
         if (gender == "female")
         {
             isPregnant = true;
-            timeSinceLastMate = UnityEngine.Random.Range(pregnancyPeriod - 1, pregnancyPeriod);
+            timeSinceLastMate = UnityEngine.Random.Range(pregnancyPeriod - 3, pregnancyPeriod);
         }
     }
     //Action Event Subscriber
@@ -178,7 +178,7 @@ public class Predator : MonoBehaviour
         }
         if (_waterSourceTiger != null)
         {
-           // waterSource = _waterSourceTiger.transform;
+            // waterSource = _waterSourceTiger.transform;
         }
     }
 
@@ -206,7 +206,7 @@ public class Predator : MonoBehaviour
         StateCheck();
         SwitchState(currentState);
         SwitchAnimation(animationState);
-        WaterConsumption();
+        // WaterConsumption();
     }
 
     void Engine()
@@ -306,17 +306,17 @@ public class Predator : MonoBehaviour
         }
         else
         {
-            if (agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance || isStuck)
+            if (agent?.remainingDistance <= agent?.stoppingDistance + targetReachedDistance || isStuck)
             {
                 timer = UnityEngine.Random.Range(1f, 3f);
                 animationState = AnimationState.Idle;
                 float range = UnityEngine.Random.Range(roamDistance * 2, roamDistance * 5);
-                agent.SetDestination(RandomSearch(transform.position, range));
+                agent?.SetDestination(RandomSearch(transform.position, range));
             }
             else
             {
                 animationState = AnimationState.Walking;
-                agent.SetDestination(agent.destination);
+                agent?.SetDestination(agent.destination);
             }
 
         }
@@ -325,24 +325,28 @@ public class Predator : MonoBehaviour
     float stuckTime = 10f;
     void IsStuck()
     {
-
-        if (stuckTime > 0)
+        if (agent != null)
         {
-            if ((agent.pathPending && agent.remainingDistance > agent.stoppingDistance + targetReachedDistance) || agent.isStopped)
+            if (stuckTime > 0)
             {
-                stuckTime -= Time.deltaTime;
+                if ((agent.pathPending && agent.remainingDistance > agent.stoppingDistance + targetReachedDistance) || agent.isStopped)
+                {
+                    stuckTime -= Time.deltaTime;
+                }
+                else
+                {
+                    isStuck = false;
+                }
+
             }
             else
             {
-                isStuck = false;
+                isStuck = true;
+                stuckTime = 10;
             }
+        }
 
-        }
-        else
-        {
-            isStuck = true;
-            stuckTime = 10;
-        }
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -362,19 +366,23 @@ public class Predator : MonoBehaviour
 
     void Roam()
     {
-        if (!(agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance)) agent.SetDestination(agent.destination);
-        else
+        if (agent != null)
         {
-            agent.speed = walkingSpeed * speedFactor;
-            animationState = AnimationState.Walking;
-            agent.SetDestination(RandomSearch(transform.position, roamDistance));
+            if (!(agent?.remainingDistance <= agent?.stoppingDistance + targetReachedDistance)) agent?.SetDestination(agent.destination);
+            else
+            {
+                agent.speed = walkingSpeed * speedFactor;
+                animationState = AnimationState.Walking;
+                agent?.SetDestination(RandomSearch(transform.position, roamDistance));
+            }
         }
+
     }
     void Chase(Vector3 targetPos)
     {
         agent.speed = runningSpeed * speedFactor;
         animationState = AnimationState.Running;
-        agent.SetDestination(targetPos);
+        agent?.SetDestination(targetPos);
     }
     void FindWater()
     {
@@ -393,7 +401,7 @@ public class Predator : MonoBehaviour
         isPregnant = false;
         isBreedNow = false;
         timeSinceLastMate = 0;
-        OnSpawn();
+        OnSpawn(this.gameObject);
     }
     ////////////////////////////////////////////////////////////////
     /// Switch the animation to the given state
@@ -459,26 +467,26 @@ public class Predator : MonoBehaviour
     }
 
     public float waterConsumptionDistance = 5f;
-    void WaterConsumption()
-    {
-        waterConsumptionDistance = waterSourceReachDistance;
-        if (Vector3.Distance(transform.position, waterSource.position) <= waterConsumptionDistance)
-        {
-            isThirsty = false;
-            isWaterFound = false;
-            thirst = 0;
-            timeSinceLastDrink = 0;
-            isChase = false;
-        }
+    /* void WaterConsumption()
+     {
+         waterConsumptionDistance = waterSourceReachDistance;
+         if (Vector3.Distance(transform.position, waterSource.position) <= waterConsumptionDistance)
+         {
+             isThirsty = false;
+             isWaterFound = false;
+             thirst = 0;
+             timeSinceLastDrink = 0;
+             isChase = false;
+         }
 
-    }
-    /*
-    NavMeshPath path;
-    path = target; 
-    if (path.status == NavMeshPathStatus.PathInvalid || path.status == NavMeshPathStatus.PathPartial) {
-   // Target is unreachable
-}
-    */
+     }
+     /*
+     NavMeshPath path;
+     path = target; 
+     if (path.status == NavMeshPathStatus.PathInvalid || path.status == NavMeshPathStatus.PathPartial) {
+    // Target is unreachable
+ }
+     */
     Vector3 waterSourcePosition()
     {
         GameObject[] sources;
@@ -532,8 +540,9 @@ public class Predator : MonoBehaviour
             }
 
         }
-        if (other.gameObject.tag == "Prey" && isHungry)
+        if (other.gameObject.tag == "Prey")
         {
+
             if (Vector3.Distance(transform.position, other.gameObject.transform.position) <= killDistance)
             {
                 OnKill?.Invoke(other.gameObject);
@@ -543,7 +552,7 @@ public class Predator : MonoBehaviour
                 isHungry = false;
                 isChase = false;
             }
-            if (Vector3.Distance(transform.position, other.gameObject.transform.position) < chaseDistance)
+            if (Vector3.Distance(transform.position, other.gameObject.transform.position) < chaseDistance && (UnityEngine.Random.Range(1f, 101f) > 6 || isHungry))
             {
                 target = other.gameObject.transform.position;
                 isChase = true;
@@ -577,12 +586,14 @@ public class Predator : MonoBehaviour
         }
         if (collision.gameObject.tag == "Prey")
         {
+
             OnKill?.Invoke(collision.gameObject);
             isFoodFound = false;
             hunger = 1;
             timeSinceLastMeal = 1;
             isHungry = false;
             isChase = false;
+
         }
 
     }

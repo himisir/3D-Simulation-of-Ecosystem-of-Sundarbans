@@ -3,18 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.IO;
 using UnityEngine.AI;
 
 public class SimulationManager : MonoBehaviour
 {
     public GameObject predator;
     public GameObject prey;
-
     public GameObject tigerOrigin;
     public GameObject deerOrigin;
-    public GameObject waterSourceTiger;
-    public GameObject waterSourceDeer;
-
     public static event Action AgeCounter;
     public static event Action Initialize;
     public static event Action NewBornStat;
@@ -35,12 +32,22 @@ public class SimulationManager : MonoBehaviour
     public int tigerPopulation;
     public int deerPopulation;
     bool initialized;
-
+    string[] stats; // 0: day, 1: tiger population, 2: deer population, 3: water sources
+    string filePath, fileName;
     [Range(1f, 100f)]
     public float timeScale;
     // Start is called before the first frame update
     void Start()
     {
+
+        fileName = "SimulationStats.csv";
+        if (!File.Exists(fileName))
+        {
+            File.Create(fileName);
+        }
+        filePath = Application.dataPath + "/" + fileName;
+        stats = new string[300];
+
         timeScale = 1;
         StartCoroutine(Calender());
         //Origin?.Invoke(tigerOrigin, deerOrigin, waterSourceTiger, waterSourceDeer);
@@ -84,9 +91,10 @@ public class SimulationManager : MonoBehaviour
                 InitializeDeer();
             }
             AgeCounter?.Invoke();
-
             yield return new WaitForSeconds(dayDuration);
+            GenerateStats(days);
             days++;
+
 
         }
     }
@@ -96,7 +104,7 @@ public class SimulationManager : MonoBehaviour
         Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * distance;
         randomDirection += origin;
         NavMeshHit navHit;
-        NavMesh.SamplePosition(randomDirection, out navHit, distance, NavMesh.AllAreas);
+        NavMesh.SamplePosition(randomDirection, out navHit, distance, 1);
         return navHit.position;
     }
 
@@ -107,7 +115,7 @@ public class SimulationManager : MonoBehaviour
             Debug.Log("Tiger Spawned" + i);
             float range = UnityEngine.Random.Range(minOffset, maxOffset);
             Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
-            var tiger = Instantiate(predator, position, Quaternion.identity);
+            var tiger = Instantiate(predator, position, predator.transform.rotation);
             tiger.GetComponent<Predator>().Initialization();
             predatorList.Add(tiger);
 
@@ -120,33 +128,42 @@ public class SimulationManager : MonoBehaviour
             Debug.Log("Deer Spawned" + i);
             float range = UnityEngine.Random.Range(-minOffset, maxOffset);
             Vector3 position = RandomSearch(deerOrigin.transform.position, range);
-            var deer = Instantiate(prey, position, Quaternion.identity);
+            var deer = Instantiate(prey, position, prey.transform.rotation);
             deer.GetComponent<Prey>().Initialization();
             preyList.Add(deer);
         }
     }
-    public void BreedTiger()
+    public void BreedTiger(GameObject animal)
     {
 
-        int literSize = UnityEngine.Random.Range(1, 2);
+        int literSize = UnityEngine.Random.Range(1, 3);
         for (int i = 0; i < literSize; i++)
         {
-            float range = UnityEngine.Random.Range(-minOffset, maxOffset);
-            Vector3 position = RandomSearch(tigerOrigin.transform.position, range);
-            var tiger = Instantiate(predator, position, Quaternion.identity);
+            // float range = UnityEngine.Random.Range(-minOffset, maxOffset);
+            Vector3 position = animal.transform.position;
+            //Vector3 position = RandomSearch(animal.transform.position, range);
+            var tiger = Instantiate(predator, position, animal.transform.rotation);
             tiger.GetComponent<Predator>().ParameterInitializeForNewBreed();
             predatorList.Add(tiger);
         }
 
     }
-    public void BreedDeer()
+    public void GenerateStats(int i)
     {
-        int literSize = UnityEngine.Random.Range(1, 2);
+        stats[i] = i + "," + tigerPopulation + "," + deerPopulation;
+        File.WriteAllLines(filePath, stats);
+    }
+
+
+    public void BreedDeer(GameObject animal)
+    {
+        int literSize = UnityEngine.Random.Range(1, 4);
         for (int i = 0; i < literSize; i++)
         {
-            float range = UnityEngine.Random.Range(-minOffset, maxOffset);
-            Vector3 position = RandomSearch(deerOrigin.transform.position, range);
-            var deer = Instantiate(prey, position, Quaternion.identity);
+            //  float range = UnityEngine.Random.Range(-minOffset, maxOffset);
+            Vector3 position = animal.transform.position;
+            // Vector3 position = RandomSearch(animal.transform.position, range);
+            var deer = Instantiate(prey, position, animal.transform.rotation);
             deer.GetComponent<Prey>().ParameterInitializeForNewBreed();
             preyList.Add(deer);
         }

@@ -8649,7 +8649,7 @@ MonoBehaviour:
   lifeTime: 300
   maxDaysWithoutFood: 14
   maxDaysWithoutDrink: 4
-  pregnancyPeriod: 6
+  pregnancyPeriod: 15
   targetReachedDistance: 2
   waterConsumptionDistance: 8
   waterSourceReachDistance: 8

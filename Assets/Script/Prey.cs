@@ -110,7 +110,7 @@ public class Prey : MonoBehaviour
 
 
     public static event Action<GameObject> OnDeath;
-    public static event Action OnSpawn;
+    public static event Action<GameObject> OnSpawn;
 
     void Start()
     {
@@ -138,7 +138,7 @@ public class Prey : MonoBehaviour
     }
     public void ParameterInitializeForNewBreed()
     {
-        int random = UnityEngine.Random.Range(0, 2);
+        int random = UnityEngine.Random.Range(0, 3);
         gender = (random == 1) ? "male" : "female";
         age = 0;
         thirst = 1;
@@ -154,7 +154,7 @@ public class Prey : MonoBehaviour
     public void Initialization()
     {
 
-        int random = UnityEngine.Random.Range(0, 2);
+        int random = UnityEngine.Random.Range(0, 3);
         gender = (random == 1) ? "male" : "female";
         hunger = 0;
         thirst = 0;
@@ -329,16 +329,16 @@ public class Prey : MonoBehaviour
         }
         else
         {
-            if (agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance || isStuck)
+            if ((agent != null) && agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance || isStuck)
             {
                 timer = UnityEngine.Random.Range(1f, 6f);
                 float range = UnityEngine.Random.Range(roamDistance * 2, roamDistance * 5);
-                agent.SetDestination(RandomSearch(transform.position, range));
+                agent?.SetDestination(RandomSearch(transform.position, range));
             }
             else
             {
                 animationState = AnimationState.Walking;
-                agent.SetDestination(agent.destination);
+                agent?.SetDestination(agent.destination);
             }
         }
     }
@@ -348,7 +348,7 @@ public class Prey : MonoBehaviour
 
         if (stuckTime > 0)
         {
-            if ((agent.pathPending && agent.remainingDistance > agent.stoppingDistance + targetReachedDistance) || agent.isStopped)
+            if ((agent != null) && (agent.pathPending && agent.remainingDistance > agent.stoppingDistance + targetReachedDistance) || agent.isStopped)
             {
                 stuckTime -= Time.deltaTime;
             }
@@ -381,12 +381,12 @@ public class Prey : MonoBehaviour
     public bool pathOutdated;
     void Roam()
     {
-        if (!(agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance)) agent.SetDestination(agent.destination);
+        if ((agent != null) && !(agent.remainingDistance <= agent.stoppingDistance + targetReachedDistance)) agent.SetDestination(agent.destination);
         else
         {
             agent.speed = walkingSpeed * speedFactor;
             animationState = AnimationState.Walking;
-            agent.SetDestination(RandomSearch(transform.position, roamDistance));
+            agent?.SetDestination(RandomSearch(transform.position, roamDistance));
         }
     }
 
@@ -394,14 +394,15 @@ public class Prey : MonoBehaviour
     {
         agent.speed = runningSpeed * speedFactor;
         animationState = AnimationState.Running;
-        agent.SetDestination(targetPos);
+        agent?.SetDestination(targetPos);
     }
     void Flee(Vector3 _fleeFrom)
     {
         agent.speed = fleeSpeed * speedFactor;
-        float range = UnityEngine.Random.Range(0.5f, 1f);
-        Vector3 runTo = ((transform.position - _fleeFrom) * range).normalized * fleeDistance;
-        agent.SetDestination(runTo);
+        //float range = UnityEngine.Random.Range(0.5f, 1f);
+        Vector3 runTo = ((transform.position - _fleeFrom)).normalized * fleeDistance;
+        runTo += transform.position;
+        agent?.SetDestination(runTo);
     }
     void FindWater()
     {
@@ -420,7 +421,7 @@ public class Prey : MonoBehaviour
         isPregnant = false;
         isBreedNow = false;
         timeSinceLastMate = 0;
-        OnSpawn();
+        OnSpawn(this.gameObject);
     }
     ////////////////////////////////////////////////////////////////
     /// Switch the animation to the given state
@@ -482,7 +483,6 @@ public class Prey : MonoBehaviour
             timeSinceLastDrink = 0;
             isChase = false;
         }
-
     }
 
     ///Triggers and Collisions //Lets "false" every bool after the triggered Method() is called
@@ -511,7 +511,7 @@ public class Prey : MonoBehaviour
                 thirst = 0;
                 timeSinceLastDrink = 0;
                 isChase = false;
-            }   
+            }
 
         }
 
