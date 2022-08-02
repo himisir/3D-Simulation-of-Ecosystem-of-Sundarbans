@@ -11,16 +11,18 @@ public class UI : MonoBehaviour
     public TextMeshProUGUI days, tigerPopulation, deerPopulation;
     public TextMeshProUGUI tigerSpeedText, tigerVisionRadiusText, tigerLifeSpanText, tigerPregnancyPeriodText, tigerStarvationPeriodText, tigerDehydrationPeriodText;
     public TextMeshProUGUI deerSpeedText, deerVisionRadiusText, deerLifeSpanText, deerPregnancyPeriodText, deerDehydrationPeriodText, deerStarvationPeriodText;
-
-
+    public TextMeshProUGUI tigerPopulationInitText, deerPopulationInitText, dayDurationText, timeScaleText;
 
     [HideInInspector]
     public float tigerSpeed, tigerVisionRadius, tigerLifeSpan, tigerPregnancyPeriod, tigerDaysWithoutFood, tigerDaysWithoutWater;
-
     [HideInInspector]
     public float deerSpeed, deerVisionRadius, deerLifeSpan, deerPregnancyPeriod, deerDaysWithoutWater, deerDaysWithoutFood;
     [HideInInspector]
     public float tigerInitialPopulation, deerInitialPopulation, timeScale, dayDuration;
+
+    [Header("Booleans")]
+    public bool isConfigurationDone, isClickedMainMenuButton, isClickedStartButton, isClickedConfigurationButton, isClickedExitButton;
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,11 +49,6 @@ public class UI : MonoBehaviour
         this.tigerPopulation.text = "Tiger\n" + _tigerPopulation.ToString();
         this.deerPopulation.text = "Deer\n" + _deerPopulation.ToString();
     }
-
-
-
-
-
 
     public void TigerSpeed(float _value)
     {
@@ -132,19 +129,24 @@ public class UI : MonoBehaviour
     public void InitialPopulationTiger(float _value)
     {
         tigerInitialPopulation = _value;
+        tigerPopulationInitText.text = _value.ToString();
     }
     public void InitialPopulationDeer(float _value)
     {
         deerInitialPopulation = _value;
+        deerPopulationInitText.text = _value.ToString();
     }
     public void TimeScale(float _value)
     {
         timeScale = _value;
+        timeScaleText.text = _value.ToString();
     }
     public void DayDuration(float _value)
     {
         dayDuration = _value;
+        dayDurationText.text = _value.ToString();
     }
+
 
     ///////////////////////////////
     ///////////////////////////////
@@ -173,7 +175,6 @@ public class UI : MonoBehaviour
         timeScale = _timeScale;
         dayDuration = _dayDuration;
     }
-
 
 
 }
