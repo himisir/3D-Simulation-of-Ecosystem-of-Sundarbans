@@ -39,6 +39,12 @@ public class SimulationManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        initialDeerPopulation = 20;
+        initialTigerPopulation = 10;
+        dayDuration = 24;
+        timeScale = 1;
+        isSimulationOn = false;
+        StartCoroutine(Calender());
 
         fileName = "SimulationStats.csv";
         if (!File.Exists(fileName))
@@ -47,15 +53,15 @@ public class SimulationManager : MonoBehaviour
         }
         filePath = Application.dataPath + "/" + fileName;
         stats = new string[300];
-
-        timeScale = 1;
-        StartCoroutine(Calender());
         //Origin?.Invoke(tigerOrigin, deerOrigin, waterSourceTiger, waterSourceDeer);
         Predator.OnSpawn += BreedTiger;
         Prey.OnSpawn += BreedDeer;
         Prey.OnDeath += DeleteDeer;
         Predator.OnKill += DeleteDeer;
         Predator.OnDeath += DeleteTiger;
+        UI.Booleans += SetBooleans;
+        UI.Configuration += SetConfiguration;
+        UI.TimeScaleCaster += SetTimeScale;
 
     }
     void OnDestroy()
@@ -65,38 +71,62 @@ public class SimulationManager : MonoBehaviour
         Prey.OnDeath -= DeleteDeer;
         Predator.OnDeath -= DeleteTiger;
         Predator.OnKill -= DeleteDeer;
+        UI.Booleans -= SetBooleans;
+        UI.Configuration -= SetConfiguration;
+        UI.TimeScaleCaster -= SetTimeScale;
     }
-
+    void SetBooleans(bool _isSimulationOn)
+    {
+        isSimulationOn = _isSimulationOn;
+    }
+    void SetConfiguration(float _tigerInitialPopulation, float _deerInitialPopulation, float _dayDuration)
+    {
+        initialTigerPopulation = _tigerInitialPopulation;
+        initialDeerPopulation = _deerInitialPopulation;
+        dayDuration = _dayDuration;
+    }
+    void SetTimeScale(float _timeScale)
+    {
+        timeScale = _timeScale;
+    }
     // Update is called once per frame
     void Update()
     {
-        Time.timeScale = timeScale;
-
-        tigerPopulation = predatorList.Count;
-        deerPopulation = preyList.Count;
-        if (tigerPopulation > 0 || deerPopulation > 0)
+        if (isSimulationOn)
         {
-            SimulationInfo?.Invoke(days, tigerPopulation, deerPopulation);
+            Time.timeScale = timeScale;
+            tigerPopulation = predatorList.Count;
+            deerPopulation = preyList.Count;
+            if (tigerPopulation > 0 || deerPopulation > 0)
+            {
+                SimulationInfo?.Invoke(days, tigerPopulation, deerPopulation);
+            }
         }
+
     }
 
     IEnumerator Calender()
     {
+
         while (true)
         {
-            if (!initialized)
+            if (isSimulationOn)
             {
-                initialized = true;
-                InitializeTiger();
-                InitializeDeer();
+                if (!initialized)
+                {
+                    initialized = true;
+                    InitializeTiger();
+                    InitializeDeer();
+                }
+                AgeCounter?.Invoke();
+                yield return new WaitForSeconds(dayDuration);
+                GenerateStats(days);
+                days++;
             }
-            AgeCounter?.Invoke();
-            yield return new WaitForSeconds(dayDuration);
-            GenerateStats(days);
-            days++;
-
+            else yield return new WaitForSeconds(.1f);
 
         }
+
     }
 
     Vector3 RandomSearch(Vector3 origin, float distance)

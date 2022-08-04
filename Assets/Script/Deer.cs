@@ -1,3 +1,4 @@
+/*
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
@@ -252,4 +253,4 @@ public class Deer : MonoBehaviour
         currentState = AIState.Idle;
         SwitchAnimationState(currentState);
     }
-}
+}*/

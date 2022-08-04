@@ -114,7 +114,7 @@ public class Predator : MonoBehaviour
 
     void Start()
     {
-
+        isSimulationOn = false;
         visionSphere = GetComponent<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
@@ -126,6 +126,8 @@ public class Predator : MonoBehaviour
         SimulationManager.AgeCounter += CalenderSystem;
         //SimulationManager.Origin += LocalRegionManager;
         SimulationManager.NewBornStat += ParameterInitializeForNewBreed;
+        UI.Booleans += SetBooleans;
+        UI.TigerProperties += SetProperties;
 
     }
     private void OnDestroy()
@@ -134,6 +136,26 @@ public class Predator : MonoBehaviour
         SimulationManager.Initialize -= Initialization;
         //SimulationManager.Origin -= LocalRegionManager;
         SimulationManager.NewBornStat -= ParameterInitializeForNewBreed;
+        UI.Booleans -= SetBooleans;
+        UI.TigerProperties -= SetProperties;
+    }
+
+    public void SetProperties(float _tigerSpeed, float _tigerVisionRadius, float _tigerLifeSpan, float _tigerPregnancyPeriod, float _tigerDaysWithoutFood, float _tigerDaysWithoutWater)
+    {
+        walkingSpeed = _tigerSpeed;
+        runningSpeed = _tigerSpeed * 2;
+        visionRadius = _tigerVisionRadius;
+        lifeTime = _tigerLifeSpan;
+        pregnancyPeriod = _tigerPregnancyPeriod;
+        maxDaysWithoutFood = _tigerDaysWithoutFood;
+        maxDaysWithoutDrink = _tigerDaysWithoutWater;
+
+    }
+
+    public bool isSimulationOn;
+    void SetBooleans(bool _isSimulationOn)
+    {
+        isSimulationOn = _isSimulationOn;
     }
     public void ParameterInitializeForNewBreed()
     {
@@ -199,13 +221,17 @@ public class Predator : MonoBehaviour
     }
     void Update()
     {
+        if (isSimulationOn)
+        {
+            IsStuck();
+            VisionCheck();
+            Engine();
+            StateCheck();
+            SwitchState(currentState);
+            SwitchAnimation(animationState);
+        }
 
-        IsStuck();
-        VisionCheck();
-        Engine();
-        StateCheck();
-        SwitchState(currentState);
-        SwitchAnimation(animationState);
+
         // WaterConsumption();
     }
 

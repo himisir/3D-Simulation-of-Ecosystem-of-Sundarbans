@@ -1,3 +1,4 @@
+/*
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -123,6 +124,7 @@ public void CalenderSystem()
 
     }
 */
+/*
     //Run in runtime
     void WanderingHelper()
     {
@@ -199,3 +201,4 @@ public void CalenderSystem()
     }
 
 }
+*/

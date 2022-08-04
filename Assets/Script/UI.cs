@@ -1,16 +1,26 @@
-using System.ComponentModel;
+
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UI : MonoBehaviour
 {
+    [Header("Button")]
+    [SerializeField] private Button simulate, configure, maniMenu, done, exit;
+    [Header("UI Holder")]
+    [SerializeField] private GameObject mainMenuHolder, configurationHolder, statHolder;
 
-    public TextMeshProUGUI days, tigerPopulation, deerPopulation;
+    [Header("Stats")]
+    public TextMeshProUGUI days, tigerPopulation, deerPopulation, timeScaleStatText;
+    [Header("Tiger GUI")]
     public TextMeshProUGUI tigerSpeedText, tigerVisionRadiusText, tigerLifeSpanText, tigerPregnancyPeriodText, tigerStarvationPeriodText, tigerDehydrationPeriodText;
+    [Header("Deer GUI")]
     public TextMeshProUGUI deerSpeedText, deerVisionRadiusText, deerLifeSpanText, deerPregnancyPeriodText, deerDehydrationPeriodText, deerStarvationPeriodText;
+    [Header("Configuration GUI")]
     public TextMeshProUGUI tigerPopulationInitText, deerPopulationInitText, dayDurationText, timeScaleText;
 
     [HideInInspector]
@@ -21,7 +31,17 @@ public class UI : MonoBehaviour
     public float tigerInitialPopulation, deerInitialPopulation, timeScale, dayDuration;
 
     [Header("Booleans")]
-    public bool isConfigurationDone, isClickedMainMenuButton, isClickedStartButton, isClickedConfigurationButton, isClickedExitButton;
+    public bool isSimulationOn, isConfigurationDone, isClickedMainMenuButton, isClickedStartButton, isClickedConfigurationButton, isClickedExitButton;
+    [HideInInspector] private int day, tiger, deer;
+
+    public static event Action<float, float, float, float, float, float> TigerProperties;
+    public static event Action<float, float, float, float, float> DeerProperties;
+    public static event Action<float, float, float> Configuration;
+    public static event Action<float> TimeScaleCaster;
+
+    //isSimulationOn, isConfigurationDone, isClickedMainMenuButton, isClickedStartButton, isClickedConfigurationButton isClickedExitButton;
+    public static event Action<bool> Booleans;
+
 
 
     // Start is called before the first frame update
@@ -31,7 +51,23 @@ public class UI : MonoBehaviour
         //deerPopulation = GetComponent<TextMeshProUGUI>();
         //tigerPopulation = GetComponent<TextMeshProUGUI>();
 
+        simulate.onClick.AddListener(() => Simulate());
+        configure.onClick.AddListener(() => Configure());
+        maniMenu.onClick.AddListener(() => MainMenu());
+        done.onClick.AddListener(() => Done());
+        exit.onClick.AddListener(() => Exit());
+
+        //Panel initialization
+        mainMenuHolder.SetActive(true);
+        configurationHolder.SetActive(false);
+        statHolder.SetActive(false);
         SimulationManager.SimulationInfo += ShowSimulationInfo;
+        //Boolean initialization
+        isSimulationOn = false;
+        isConfigurationDone = false;
+        timeScale = 1;
+
+
 
     }
     void OnDestroy()
@@ -39,7 +75,6 @@ public class UI : MonoBehaviour
         SimulationManager.SimulationInfo -= ShowSimulationInfo;
     }
 
-    int day, tiger, deer;
     public void ShowSimulationInfo(int _days, int _tigerPopulation, int _deerPopulation)
     {
         day = _days;
@@ -49,6 +84,75 @@ public class UI : MonoBehaviour
         this.tigerPopulation.text = "Tiger\n" + _tigerPopulation.ToString();
         this.deerPopulation.text = "Deer\n" + _deerPopulation.ToString();
     }
+
+    // mainMenuHolder, configurationHolder, statHolder;
+
+    public void Simulate()
+    {
+        isSimulationOn = true;
+        statHolder.SetActive(true);
+
+        mainMenuHolder.SetActive(false);
+        configurationHolder.SetActive(false);
+
+    }
+    public void Configure()
+    {
+        isSimulationOn = false;
+        configurationHolder.SetActive(true);
+
+        mainMenuHolder.SetActive(false);
+        statHolder.SetActive(false);
+    }
+    public void MainMenu()
+    {
+        SceneManager.LoadScene(0);
+        isConfigurationDone = false;
+        isSimulationOn = false;
+
+        mainMenuHolder.SetActive(true);
+
+        configurationHolder.SetActive(false);
+        statHolder.SetActive(false);
+    }
+    public void Done()
+    {
+        isConfigurationDone = true;
+        isSimulationOn = false;
+
+        mainMenuHolder.SetActive(true);
+
+        configurationHolder.SetActive(false);
+        statHolder.SetActive(false);
+
+    }
+    public void Exit()
+    {
+        Application.Quit();
+    }
+
+    void Update()
+    {
+        Bridge();
+    }
+    /// <summary>
+    /// Exchanging data in between scripts
+    /// </summary>
+    void Bridge()
+    {
+        if (isConfigurationDone) //Send it to simulation manager once data insertion is done. 
+        {
+            Configuration?.Invoke(tigerInitialPopulation, deerInitialPopulation, dayDuration);
+            TigerProperties?.Invoke(tigerSpeed, tigerVisionRadius, tigerLifeSpan, tigerPregnancyPeriod, tigerDaysWithoutFood, tigerDaysWithoutWater);
+            DeerProperties?.Invoke(deerSpeed, deerVisionRadius, deerLifeSpan, deerPregnancyPeriod, deerDaysWithoutWater);
+        }
+        if (isSimulationOn)
+        {
+            TimeScaleCaster?.Invoke(timeScale);
+        }
+        Booleans?.Invoke(isSimulationOn);
+    }
+
 
     public void TigerSpeed(float _value)
     {
@@ -67,8 +171,6 @@ public class UI : MonoBehaviour
     {
         tigerLifeSpan = _value;
         tigerLifeSpanText.text = _value.ToString();
-
-
     }
     public void TigerPregnancyPeriod(float _value)
     {
@@ -146,35 +248,12 @@ public class UI : MonoBehaviour
         dayDuration = _value;
         dayDurationText.text = _value.ToString();
     }
+    public void TimeScaleStat(float _value) //For to show the time scale in the stat menu
+    {
+        timeScale = _value;
+        timeScaleStatText.text = _value.ToString(); //Need it to update based on the value
 
-
+    }
     ///////////////////////////////
     ///////////////////////////////
-
-    public void TigerInitials(float _tigerVisionRadius, float _tigerSpeed, float _tigerLifeSpan, float _tigerPregnancyPeriod, int _tigerDaysWithoutFood, int _tigerDaysWithoutWater)
-    {
-        tigerVisionRadius = _tigerVisionRadius;
-        tigerSpeed = _tigerSpeed;
-        tigerLifeSpan = _tigerLifeSpan;
-        tigerPregnancyPeriod = _tigerPregnancyPeriod;
-        tigerDaysWithoutFood = _tigerDaysWithoutFood;
-        tigerDaysWithoutWater = _tigerDaysWithoutWater;
-    }
-    public void DeerInitials(float _deerVisionRadius, float _deerSpeed, float _deerLifeSpan, float _deerPregnancyPeriod, int _deerDaysWithoutWater)
-    {
-        deerVisionRadius = _deerVisionRadius;
-        deerSpeed = _deerSpeed;
-        deerLifeSpan = _deerLifeSpan;
-        deerPregnancyPeriod = _deerPregnancyPeriod;
-        deerDaysWithoutWater = _deerDaysWithoutWater;
-    }
-    public void SimulationInitials(float _tigerPopulationInit, float _deerPopulationInit, float _timeScale, float _dayDuration)
-    {
-        tigerInitialPopulation = _tigerPopulationInit;
-        deerInitialPopulation = _deerPopulationInit;
-        timeScale = _timeScale;
-        dayDuration = _dayDuration;
-    }
-
-
 }

@@ -8545,7 +8545,7 @@ GameObject:
   - component: {fileID: 409339906363256947}
   - component: {fileID: 409339906363256946}
   m_Layer: 0
-  m_Name: Tiger AI(Offset) (1)
+  m_Name: Tiger AI
   m_TagString: Predator
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

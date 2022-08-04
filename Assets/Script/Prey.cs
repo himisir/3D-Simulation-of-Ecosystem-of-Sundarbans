@@ -114,6 +114,7 @@ public class Prey : MonoBehaviour
 
     void Start()
     {
+        isSimulationOn = false;
 
         visionSphere = GetComponent<SphereCollider>();
         agent = GetComponent<NavMeshAgent>();
@@ -127,6 +128,7 @@ public class Prey : MonoBehaviour
         SimulationManager.Initialize += Initialization;
         SimulationManager.AgeCounter += CalenderSystem;
         SimulationManager.NewBornStat += ParameterInitializeForNewBreed;
+        UI.Booleans += SetBooleans;
 
     }
     private void OnDestroy()
@@ -135,6 +137,25 @@ public class Prey : MonoBehaviour
         SimulationManager.Initialize -= Initialization;
         //SimulationManager.Origin -= LocalRegionManager;
         SimulationManager.NewBornStat -= ParameterInitializeForNewBreed;
+        UI.Booleans -= SetBooleans;
+    }
+
+    void SetProperties(float _deerSpeed, float _deerVisionRadius, float _deerLifeSpan, float _deerPregnancyPeriod, float _deerDaysWithoutWater)
+    {
+        walkingSpeed = _deerSpeed;
+        fleeSpeed = _deerSpeed * 2.1f;
+        runningSpeed = _deerSpeed * 2;
+        visionRadius = _deerVisionRadius;
+        lifeTime = _deerLifeSpan;
+        pregnancyPeriod = _deerPregnancyPeriod;
+        maxDaysWithoutDrink = _deerDaysWithoutWater;
+
+    }
+
+    public bool isSimulationOn;
+    void SetBooleans(bool _isSimulationOn)
+    {
+        isSimulationOn = _isSimulationOn;
     }
     public void ParameterInitializeForNewBreed()
     {
@@ -217,14 +238,16 @@ public class Prey : MonoBehaviour
 
     void Update()
     {
+        if (isSimulationOn)
+        { //Debug.Log(currentState);
+            VisionCheck();
+            Engine();
+            StateCheck();
+            // SwitchState(currentState);
+            SwitchAnimation(animationState);
+            WaterConsumption();
+        }
 
-        //Debug.Log(currentState);
-        VisionCheck();
-        Engine();
-        StateCheck();
-        // SwitchState(currentState);
-        SwitchAnimation(animationState);
-        WaterConsumption();
 
     }
 

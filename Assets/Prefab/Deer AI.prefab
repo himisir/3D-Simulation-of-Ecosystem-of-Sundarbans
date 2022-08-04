@@ -620,7 +620,7 @@ GameObject:
   - component: {fileID: 3161993239401689976}
   - component: {fileID: 3161993239401689977}
   m_Layer: 0
-  m_Name: Deer AI(Offset) (1)
+  m_Name: Deer AI
   m_TagString: Prey
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
