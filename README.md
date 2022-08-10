@@ -1,20 +1,8 @@
 # 3D-Simulation-of-Ecosystem-of-Sundarbans
-An early playable version can be found in ![link](https://himisir.itch.io/ecosim-3d)
+An early playable version can be found in [here](https://himisir.itch.io/ecosim-3d)
 
-Predator prey based model of the Sundarbans
-
-Set the initial population of predator and prey species in Simulation Manager and run the simulation.
-Indivisual properties of predator or prey species can be changed by predator and prey prefabs.
-
-For the best experience, switch to fullscreen mode. 
-
-It includes a WASD camera control. Hold down the right mouse click to look around.
-
-The "Simulate" button will start a simulation with the default configuration value. 
-
-The "Configure" button allows users to set up an environment of their own. The default value of each field is zero, therefore every field must be filled in order to function properly. A higher life span with a lower pregnancy period helps the simulation run longer. 
-
-The Time Scale Slider allows you to fasten up the simulation. Simulation can behave oddly if the timescale is set too high. 
+Predator prey based model of the Sundarbans.
+Go to fullscreen mode for the best experience. It has a WASD camera control. Hold down the right mouse button to look around. The "Simulate" button starts a simulation with the default configuration value.Users can customize their environment by using the "Configure" button. Since each field's default value is zero, all of them must be filled out for the system to work as intended. The simulation runs longer when the life span is higher and the pregnancy period is shorter. The Time Scale Slider allows you to accelerate the simulation. If the timescale is set too high, simulation can behave strangely.
 
 
 ![image](https://user-images.githubusercontent.com/31031926/182848190-84f7e0f9-a06b-4dd3-a128-d322fff37dc5.png)
