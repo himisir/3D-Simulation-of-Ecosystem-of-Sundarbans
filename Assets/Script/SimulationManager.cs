@@ -120,7 +120,7 @@ public class SimulationManager : MonoBehaviour
                 }
                 AgeCounter?.Invoke();
                 yield return new WaitForSeconds(dayDuration);
-                GenerateStats(days);
+                //GenerateStats(days);
                 days++;
             }
             else yield return new WaitForSeconds(.1f);
